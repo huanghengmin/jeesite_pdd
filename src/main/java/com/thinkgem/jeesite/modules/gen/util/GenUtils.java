@@ -140,6 +140,12 @@ public class GenUtils {
 				column.setJavaField(column.getJavaField().replaceAll("Id", ".id|name"));
 				column.setShowType("officeselect");
 			}
+			// 公司
+			else if (StringUtils.startsWithIgnoreCase(column.getName(), "office_id")){
+				column.setJavaType(Office.class.getName());
+				column.setJavaField(column.getJavaField().replaceAll("Id", ".id|name"));
+				column.setShowType("companyselect");
+			}
 			// 区域
 			else if (StringUtils.startsWithIgnoreCase(column.getName(), "area_id")){
 				column.setJavaType(Area.class.getName());

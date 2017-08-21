@@ -53,7 +53,7 @@ public class OfficeController extends BaseController {
 	@RequiresPermissions("sys:office:view")
 	@RequestMapping(value = {""})
 	public String index(Office office, Model model) {
-//        model.addAttribute("list", officeService.findAll());
+//        model.addAttribute("list", officeService.findAllOrder());
 		return "modules/sys/officeIndex";
 	}
 

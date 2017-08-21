@@ -62,6 +62,9 @@
 			<#elseif c.showType == "officeselect">
 				<sys:treeselect id="${c.simpleJavaField}" name="${c.javaFieldId}" value="${"$"}{${className}.${c.javaFieldId}}" labelName="${c.javaFieldName}" labelValue="${"$"}{${className}.${c.javaFieldName}}"
 					title="部门" url="/sys/office/treeData?type=2" cssClass="input-small" allowClear="true" notAllowSelectParent="true"/>
+			<#elseif c.showType == "companyselect">
+				<sys:treeselect id="${c.simpleJavaField}" name="${c.javaFieldId}" value="${"$"}{${className}.${c.javaFieldId}}" labelName="${c.javaFieldName}" labelValue="${"$"}{${className}.${c.javaFieldName}}"
+					title="公司" url="/sys/office/treeData?type=1" cssClass="input-small" allowClear="true" notAllowSelectParent="true"/>
 			<#elseif c.showType == "areaselect">
 				<sys:treeselect id="${c.simpleJavaField}" name="${c.javaFieldId}" value="${"$"}{${className}.${c.javaFieldId}}" labelName="${c.javaFieldName}" labelValue="${"$"}{${className}.${c.javaFieldName}}"
 					title="区域" url="/sys/area/treeData" cssClass="input-small" allowClear="true" notAllowSelectParent="true"/>
@@ -96,7 +99,7 @@
 					<fmt:formatDate value="${"$"}{${className}.${c.javaFieldId}}" pattern="yyyy-MM-dd HH:mm:ss"/>
 				<#elseif c.showType == "select" || c.showType == "checkbox" || c.showType == "radiobox">
 					${"$"}{fns:getDictLabel(${className}.${c.javaFieldId}, '${c.dictType}', '')}
-				<#elseif c.showType == "userselect" || c.showType == "officeselect" || c.showType == "areaselect">
+				<#elseif c.showType == "userselect" || c.showType == "officeselect" || c.showType == "areaselect"|| c.showType == "companyselect">
 					${"$"}{${className}.${c.javaFieldName}}
 				<#else>
 					${"$"}{${className}.${c.javaFieldId}}

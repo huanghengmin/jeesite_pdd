@@ -65,7 +65,7 @@ public class AreaController extends BaseController {
 //		// 自动获取排序号
 //		if (StringUtils.isBlank(area.getId())){
 //			int size = 0;
-//			List<Area> list = areaService.findAll();
+//			List<Area> list = areaService.findAllOrder();
 //			for (int i=0; i<list.size(); i++){
 //				Area e = list.get(i);
 //				if (e.getParent()!=null && e.getParent().getId()!=null
