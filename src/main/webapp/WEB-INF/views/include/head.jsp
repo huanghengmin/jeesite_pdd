@@ -1,7 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><meta name="author" content="http://jeesite.com/"/>
 <meta name="renderer" content="webkit"><meta http-equiv="X-UA-Compatible" content="IE=8,IE=9,IE=10" />
 <meta http-equiv="Expires" content="0"><meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="Cache-Control" content="no-store">
-<script src="${ctxStatic}/jquery/jquery-1.8.3.min.js" type="text/javascript"></script>
+<%--<script src="${ctxStatic}/jquery/jquery-1.8.3.min.js" type="text/javascript"></script>--%>
+<link rel="stylesheet" href="${ctxStatic}/jquery-ui-1.12.1.custom/jquery-ui.css">
+<script src="${ctxStatic}/jquery/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="${ctxStatic}/jquery-ui-1.12.1.custom/jquery-ui.js" type="text/javascript"></script>
+<script src="${ctxStatic}/Highcharts-5.0.14/code/highcharts.js" type="text/javascript"></script>
+<script src="${ctxStatic}/Highcharts-5.0.14/custom-chart.js" type="text/javascript"></script>
+<link href="${ctxStatic}/Highcharts-5.0.14/stickyfooter.css" type="text/css" rel="stylesheet" />
+<script src="${ctxStatic}/jquery-toggle-password/jquery.toggle-password.js" type="text/javascript"></script>
 <link href="${ctxStatic}/bootstrap/2.3.1/css_${not empty cookie.theme.value ? cookie.theme.value : 'cerulean'}/bootstrap.min.css" type="text/css" rel="stylesheet" />
 <script src="${ctxStatic}/bootstrap/2.3.1/js/bootstrap.min.js" type="text/javascript"></script>
 <link href="${ctxStatic}/bootstrap/2.3.1/awesome/font-awesome.min.css" type="text/css" rel="stylesheet" />
@@ -18,4 +25,5 @@
 <script src="${ctxStatic}/common/mustache.min.js" type="text/javascript"></script>
 <link href="${ctxStatic}/common/jeesite.css" type="text/css" rel="stylesheet" />
 <script src="${ctxStatic}/common/jeesite.js" type="text/javascript"></script>
+
 <script type="text/javascript">var ctx = '${ctx}', ctxStatic='${ctxStatic}';</script>

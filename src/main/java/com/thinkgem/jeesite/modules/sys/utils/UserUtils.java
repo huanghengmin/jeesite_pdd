@@ -41,7 +41,6 @@ public class UserUtils {
 	private static RoleDao roleDao = SpringContextHolder.getBean(RoleDao.class);
 	private static MenuDao menuDao = SpringContextHolder.getBean(MenuDao.class);
 	private static AreaDao areaDao = SpringContextHolder.getBean(AreaDao.class);
-	private static PddPlatformDao platformDao = SpringContextHolder.getBean(PddPlatformDao.class);
 	private static OfficeDao officeDao = SpringContextHolder.getBean(OfficeDao.class);
 
 	public static final String USER_CACHE = "userCache";
@@ -53,7 +52,6 @@ public class UserUtils {
 	public static final String CACHE_ROLE_LIST = "roleList";
 	public static final String CACHE_MENU_LIST = "menuList";
 	public static final String CACHE_AREA_LIST = "areaList";
-	public static final String CACHE_PLATFORM_LIST = "platforList";
 	public static final String CACHE_OFFICE_LIST = "officeList";
 	public static final String CACHE_OFFICE_ALL_LIST = "officeAllList";
 	
@@ -192,20 +190,6 @@ public class UserUtils {
 			putCache(CACHE_AREA_LIST, areaList);
 		}
 		return areaList;
-	}
-
-	/**
-	 * 获取所有平台信息
-	 * @return
-	 */
-	public static List<PddPlatform> getPddPlatformList(){
-		@SuppressWarnings("unchecked")
-		List<PddPlatform> orderList = (List<PddPlatform>)getCache(CACHE_PLATFORM_LIST);
-		if (orderList == null){
-			orderList = platformDao.findAllList(new PddPlatform());
-			putCache(CACHE_PLATFORM_LIST, orderList);
-		}
-		return orderList;
 	}
 	
 	/**
