@@ -3,7 +3,9 @@
  */
 package com.thinkgem.jeesite.modules.sys.web;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +13,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Lists;
+import com.thinkgem.jeesite.modules.pdd.dao.PddVcodeDao;
+import com.thinkgem.jeesite.modules.pdd.entity.PddVcode;
+import com.thinkgem.jeesite.modules.pdd.service.PddVcodeService;
 import com.thinkgem.jeesite.modules.sys.dao.RoleDao;
 import com.thinkgem.jeesite.modules.sys.entity.Office;
 import com.thinkgem.jeesite.modules.sys.entity.Role;
 import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.service.OfficeService;
 import com.thinkgem.jeesite.modules.sys.service.SystemService;
+import com.thinkgem.jeesite.modules.quartz.util.RandNumUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.web.util.WebUtils;
@@ -39,6 +45,7 @@ import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.sys.security.FormAuthenticationFilter;
 import com.thinkgem.jeesite.modules.sys.security.SystemAuthorizingRealm.Principal;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 登录Controller
@@ -56,6 +63,9 @@ public class LoginController extends BaseController{
 
 	@Autowired
 	private OfficeService officeService;
+
+	@Autowired
+	private PddVcodeService pddVcodeService;
 	
 	/**
 	 * 管理登录
@@ -96,35 +106,40 @@ public class LoginController extends BaseController{
 	public String register(HttpServletRequest request, HttpServletResponse response, Model model) {
 		String phone = request.getParameter("phone");
 		String password = request.getParameter("password");
+		String vcode = request.getParameter("vcode");
 		if(phone!=null&&password!=null){
-			User user = new User();
-			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
-			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
-			user.setCompany(officeService.get("1")); //公司
-			user.setOffice(officeService.get("2"));   //部门
-			user.setLoginName(phone);
+			PddVcode pddVcode = pddVcodeService.getByPhone(phone);
+			if(pddVcode!=null) {
+				User user = new User();
+				// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+				// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+				user.setCompany(officeService.get("1")); //公司
+				user.setOffice(officeService.get("2"));   //部门
+				user.setLoginName(phone);
 
-			user.setPassword(password);
-			user.setNewPassword(password);
+				user.setPassword(password);
+				user.setNewPassword(password);
 
-			user.setNo(phone);
-			user.setName(phone);
-			user.setPhone(phone);
-			user.setLoginFlag("1");//可登陆
-			user.setDelFlag("0"); //未删除
-			// 如果新密码为空，则不更换密码
-			if (StringUtils.isNotBlank(user.getNewPassword())) {
-				user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
-			}
-			 if (!(user.getLoginName() !=null && systemService.getUserByLoginName(user.getLoginName()) == null)) {
-				 addMessage(model, "注册用户'" + user.getLoginName() + "'失败，登录名已存在");
-				 return "modules/sys/sysRegister";
-			 }
-			// 角色数据有效性验证，过滤不在授权内的角色
-			List<Role> roleList = Lists.newArrayList();
+				user.setNo(phone);
+				user.setName(phone);
+				user.setPhone(phone);
+				user.setLoginFlag("1");//可登陆
+				user.setDelFlag("0"); //未删除
+				//check vcode
+				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()>1000*60*1){//已过1分钟，需要重新发送
+					// 如果新密码为空，则不更换密码
+					if (StringUtils.isNotBlank(user.getNewPassword())) {
+						user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
+					}
+					if (!(user.getLoginName() != null && systemService.getUserByLoginName(user.getLoginName()) == null)) {
+						addMessage(model, "注册用户'" + user.getLoginName() + "'失败，登录名已存在或登陆名不存在");
+						return "modules/sys/sysRegister";
+					}
+					// 角色数据有效性验证，过滤不在授权内的角色
+					List<Role> roleList = Lists.newArrayList();
 
-			Role role = systemService.getRole("6");
-			roleList.add(role);
+					Role role = systemService.getRole("6");
+					roleList.add(role);
 
 //			List<String> roleIdList = new ArrayList<String>();
 //			roleIdList.add("6");//添加普通用户
@@ -134,18 +149,53 @@ public class LoginController extends BaseController{
 //					roleList.add(r);
 //				}
 //			}
-			user.setRoleList(roleList);
-			// 保存用户信息
-			systemService.saveRegisterUser(user);
-			// 清除当前用户缓存
-			if (user.getLoginName().equals(UserUtils.getUser().getLoginName())){
-				UserUtils.clearCache();
-				//UserUtils.getCacheMap().clear();
+					user.setRoleList(roleList);
+					// 保存用户信息
+					systemService.saveRegisterUser(user);
+					// 清除当前用户缓存
+					if (user.getLoginName().equals(UserUtils.getUser().getLoginName())) {
+						UserUtils.clearCache();
+						//UserUtils.getCacheMap().clear();
+					}
+					addMessage(model, "注册用户'" + user.getLoginName() + "'成功");
+					return "redirect:" + adminPath + "/modules/sys/sysRegister";
+				}else {
+					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过1分钟，已失效，请重新获取");
+					return "modules/sys/sysRegister";
+				}
 			}
-			addMessage(model, "注册用户'" + user.getLoginName() + "'成功");
-			return "redirect:" + adminPath + "/modules/sys/sysRegister";
-		}
+		}addMessage(model, "注册用户失败："+phone);
 		return "modules/sys/sysRegister";
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "${adminPath}/register/vcode")
+	public String registerVCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String phone = request.getParameter("phone");
+		if(phone!=null&&phone.length()>0){
+			int code = RandNumUtils.getRandNum(1,999999);
+			PddVcode pddVcode = pddVcodeService.getByPhone(phone);
+			if(pddVcode!=null){
+				pddVcode.setVcode(String.valueOf(code));
+				pddVcode.setUpdateTime(new Date());
+				boolean flag = pddVcodeService.updateAndSendCode(pddVcode);
+				if(flag){
+					String msg = "已发送短信，请注意查收";
+					return "{success:true,msg:'"+msg+"'}";
+				}
+			}else {
+				pddVcode.setVcode(String.valueOf(code));
+				pddVcode.setUpdateTime(new Date());
+				boolean flag = pddVcodeService.insertAndSendCode(pddVcode);
+				if(flag){
+					String msg = "已发送短信，请注意查收";
+					return "{success:true,msg:'"+msg+"'}";
+				}
+			}
+		}
+//		return "modules/sys/sysRegister";
+		String msg = "发送短信异常，phone:"+phone;
+		return "{success:true,msg:"+msg+"}";
 	}
 
 

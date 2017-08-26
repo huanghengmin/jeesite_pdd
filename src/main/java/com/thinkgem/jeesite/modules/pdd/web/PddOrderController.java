@@ -70,9 +70,9 @@ public class PddOrderController extends BaseController {
 
 		}else {
 			PddPlatform pddPlatform = new PddPlatform(UserUtils.getUser());
+			pddOrder.setPddPlatform(pddPlatform);
 			Page<PddOrder> page = pddOrderService.findPageByUser(new Page<PddOrder>(request, response), pddOrder);
 			model.addAttribute("page", page);
-			pddOrder.setPddPlatform(pddPlatform);
 			List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddPlatform);
 			model.addAttribute("pddPlatformList", pddPlatformList);
 		}
