@@ -3,11 +3,20 @@
  */
 package com.thinkgem.jeesite.modules.sys.web;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Lists;
+import com.thinkgem.jeesite.modules.sys.dao.RoleDao;
+import com.thinkgem.jeesite.modules.sys.entity.Office;
+import com.thinkgem.jeesite.modules.sys.entity.Role;
+import com.thinkgem.jeesite.modules.sys.entity.User;
+import com.thinkgem.jeesite.modules.sys.service.OfficeService;
+import com.thinkgem.jeesite.modules.sys.service.SystemService;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.web.util.WebUtils;
@@ -41,6 +50,12 @@ public class LoginController extends BaseController{
 	
 	@Autowired
 	private SessionDAO sessionDAO;
+
+	@Autowired
+	private SystemService systemService;
+
+	@Autowired
+	private OfficeService officeService;
 	
 	/**
 	 * 管理登录
@@ -77,6 +92,76 @@ public class LoginController extends BaseController{
 		return "modules/sys/sysLogin";
 	}
 
+	@RequestMapping(value = "${adminPath}/register")
+	public String register(HttpServletRequest request, HttpServletResponse response, Model model) {
+		String phone = request.getParameter("phone");
+		String password = request.getParameter("password");
+		if(phone!=null&&password!=null){
+			User user = new User();
+			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+			user.setCompany(officeService.get("1")); //公司
+			user.setOffice(officeService.get("2"));   //部门
+			user.setLoginName(phone);
+
+			user.setPassword(password);
+			user.setNewPassword(password);
+
+			user.setNo(phone);
+			user.setName(phone);
+			user.setPhone(phone);
+			user.setLoginFlag("1");//可登陆
+			user.setDelFlag("0"); //未删除
+			// 如果新密码为空，则不更换密码
+			if (StringUtils.isNotBlank(user.getNewPassword())) {
+				user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
+			}
+			 if (!(user.getLoginName() !=null && systemService.getUserByLoginName(user.getLoginName()) == null)) {
+				 addMessage(model, "注册用户'" + user.getLoginName() + "'失败，登录名已存在");
+				 return "modules/sys/sysRegister";
+			 }
+			// 角色数据有效性验证，过滤不在授权内的角色
+			List<Role> roleList = Lists.newArrayList();
+
+			Role role = systemService.getRole("6");
+			roleList.add(role);
+
+//			List<String> roleIdList = new ArrayList<String>();
+//			roleIdList.add("6");//添加普通用户
+
+//			for (Role r : systemService.findAllRole()){
+//				if (roleIdList.contains(r.getId())){
+//					roleList.add(r);
+//				}
+//			}
+			user.setRoleList(roleList);
+			// 保存用户信息
+			systemService.saveRegisterUser(user);
+			// 清除当前用户缓存
+			if (user.getLoginName().equals(UserUtils.getUser().getLoginName())){
+				UserUtils.clearCache();
+				//UserUtils.getCacheMap().clear();
+			}
+			addMessage(model, "注册用户'" + user.getLoginName() + "'成功");
+			return "redirect:" + adminPath + "/modules/sys/sysRegister";
+		}
+		return "modules/sys/sysRegister";
+	}
+
+
+	/**
+	 * 管理登录
+	 */
+	@RequestMapping(value = "${adminPath}/forget", method = RequestMethod.GET)
+	public String forget(HttpServletRequest request, HttpServletResponse response, Model model) {
+//		String view;
+//		view = "/WEB-INF/views/modules/sys/sysLogin.jsp";
+//		view = "classpath:";
+//		view += "jar:file:/D:/GitHub/jeesite/src/main/webapp/WEB-INF/lib/jeesite.jar!";
+//		view += "/"+getClass().getName().replaceAll("\\.", "/").replace(getClass().getSimpleName(), "")+"view/sysLogin";
+//		view += ".jsp";
+		return "modules/sys/sysForget";
+	}
 	/**
 	 * 登录失败，真正登录的POST请求由Filter完成
 	 */

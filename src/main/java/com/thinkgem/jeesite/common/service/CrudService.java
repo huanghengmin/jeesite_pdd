@@ -5,6 +5,8 @@ package com.thinkgem.jeesite.common.service;
 
 import java.util.List;
 
+import com.thinkgem.jeesite.common.utils.IdGen;
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,8 +73,8 @@ public abstract class CrudService<D extends CrudDao<T>, T extends DataEntity<T>>
 	 */
 	@Transactional(readOnly = false)
 	public void save(T entity) {
-		if (entity.getIsNewRecord()){
-			entity.preInsert();
+		if (StringUtils.isBlank(entity.getId())){
+			entity.setId(IdGen.uuid());
 			dao.insert(entity);
 		}else{
 			entity.preUpdate();

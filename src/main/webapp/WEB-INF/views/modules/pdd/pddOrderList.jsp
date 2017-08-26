@@ -67,7 +67,7 @@
 			</li>
 			<li><label>所属平台：</label>
 				<form:select path="pddPlatform.id" class="input-mini">
-					<form:option value="" label="请选择" htmlEscape="false" />
+					<form:option value="" label="全部平台" htmlEscape="false" />
 					<form:options items="${pddPlatformList}" itemLabel="shopName" itemValue="id" htmlEscape="false" />
 				</form:select>
 			</li>
@@ -81,7 +81,7 @@
 			</li>
 			<li><label>包裹状态：</label>
 				<form:select path="packageStatus" class="input-medium">
-					<form:option value="" label=""/>
+					<form:option value="" label="请选择" htmlEscape="false" />
 					<form:options items="${fns:getDictList('package_status')}" itemLabel="label" itemValue="value" htmlEscape="false"/>
 				</form:select>
 			</li>

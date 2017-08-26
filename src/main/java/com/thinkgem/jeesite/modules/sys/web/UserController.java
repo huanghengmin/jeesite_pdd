@@ -10,6 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 
+import com.thinkgem.jeesite.modules.pdd.dao.PddEmailDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddExpressDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
+import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
+import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -53,7 +59,8 @@ public class UserController extends BaseController {
 	@ModelAttribute
 	public User get(@RequestParam(required=false) String id) {
 		if (StringUtils.isNotBlank(id)){
-			return systemService.getUser(id);
+			 User user = systemService.getUser(id);
+			return user;
 		}else{
 			return new User();
 		}
@@ -71,6 +78,33 @@ public class UserController extends BaseController {
 		Page<User> page = systemService.findUser(new Page<User>(request, response), user);
         model.addAttribute("page", page);
 		return "modules/sys/userList";
+	}
+
+	@RequiresPermissions("sys:user:view")
+	@RequestMapping(value = {"setByUser", ""})
+	public String setByUser(User user, HttpServletRequest request, HttpServletResponse response, Model model) {
+		User currentUser = UserUtils.getUser();
+        model.addAttribute("user", currentUser);
+		return "modules/sys/userSet";
+	}
+
+	@RequiresPermissions("sys:user:edit")
+	@RequestMapping(value = "saveSet")
+	public String saveSet(User user, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+		if(Global.isDemoMode()){
+			addMessage(redirectAttributes, "演示模式，不允许操作！");
+			return "modules/sys/userSet";
+		}
+		User currentUser = UserUtils.getUser();
+		currentUser.setEmailRemand(user.getEmailRemand());
+		currentUser.setPullRemand(user.getPullRemand());
+		currentUser.setSecondRemand(user.getSecondRemand());
+		currentUser.setPhoneRemand(user.getPhoneRemand());
+		currentUser.setOrderCycle(user.getOrderCycle());
+		systemService.updateUserSet(currentUser);
+		model.addAttribute("message", "保存用户设置成功");
+		model.addAttribute("user", currentUser);
+		return "modules/sys/userSet";
 	}
 	
 	@ResponseBody

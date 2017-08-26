@@ -5,6 +5,7 @@ package com.thinkgem.jeesite.modules.pdd.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,8 @@ import com.thinkgem.jeesite.modules.pdd.dao.PddOrderDao;
 @Transactional(readOnly = true)
 public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 
+	@Autowired
+	private PddOrderDao pddOrderDao;
 
 
 	public PddOrder get(String id) {
@@ -45,5 +48,10 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	public void delete(PddOrder pddOrder) {
 		super.delete(pddOrder);
 	}
-	
+
+    public Page<PddOrder> findPageByUser(Page<PddOrder> pddOrderPage, PddOrder pddOrder) {
+		pddOrder.setPage(pddOrderPage);
+		pddOrderPage.setList(pddOrderDao.findListByUser(pddOrder));
+		return pddOrderPage;
+    }
 }

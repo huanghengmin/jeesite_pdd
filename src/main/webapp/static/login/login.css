@@ -1,0 +1,199 @@
+#user-index.dark {
+    /* background:#E0EDFB; */
+	background:#fff;
+}
+#user-index {
+    margin-top: 120px;
+}
+@font-face {
+  font-family: 'Roboto';   /*字体名称*/
+  src: url('//s.trackingmore.com/en/Roboto-Light.ttf');       /*字体源文件*/
+		/*字体源文件*/
+}
+body {
+    color: #333;
+    font-family: "Roboto", Helvetica, Arial, sans-serif; 
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0;
+}
+
+.container:after {
+    clear: both;
+}
+.container:before, .container:after {
+    content: "";
+    display: table;
+    line-height: 0;
+}
+.container {
+    margin-left: auto;
+    margin-right: auto;
+	max-width: 400px;
+	box-shadow: 2px 2px 7px #909fa7;
+	border-radius: 12px;
+}
+ 
+
+.row:before, .row:after {
+    content: "";
+    display: table;
+    line-height: 0;
+}
+.row:after {
+    clear: both;
+}
+
+
+.main-content.dark {
+    background-color: #fff;
+    border: 1px solid #DDD;
+}
+.main-content {
+    border-radius: 10px;
+    padding: 50px 50px 0;
+}
+
+.span4 {
+    width: 100%;
+	text-align: center;
+}
+.span4 a{
+	margin: 0 20px;
+}
+.span5{
+    width: 100%;
+	text-align: center;
+}
+
+.highlight {
+    color: #0663A2;
+}
+h3 {
+    font-size: 26px;
+}
+h2, h3 {
+    font-weight: 400;
+}
+h1, h2, h3 {
+    line-height: 40px;
+}
+form {
+    margin: 0 0 20px;
+}
+
+.form-horizontal .control-group:after {
+    clear: both;
+}
+.form-horizontal .control-group:before, .form-horizontal .control-group:after {
+    content: "";
+    display: table;
+    line-height: 0;
+}
+.form-horizontal .control-group {
+    margin-bottom: 20px;
+}
+
+textarea, input[type="text"], input[type="password"], input[type="email"],  input[type="search"], input[type="color"], .uneditable-input {
+    border-color: #bdc3c7;
+    border-width: 2px;
+    box-shadow: none;
+    box-sizing: content-box !important;
+    color: #000;
+    font-family: "Roboto", Helvetica, Arial, sans-serif; 
+    font-size: 16px;
+    transition: color 0.2s linear 0s, border 0.2s linear 0s;
+	background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+}
+
+input.span4, textarea.span4, .uneditable-input.span4 {
+    width: 95%;
+}
+input[class*="span"] {
+    float: none;
+    margin-left: 0;
+}
+
+select, textarea, input[type="text"], input[type="password"],  input[type="email"], input[type="url"], input[type="search"], .uneditable-input {
+    border-radius: 4px;
+    color: #555;
+    display: inline-block;
+    font-size: 14px;
+    height: 20px;
+    line-height: 20px;
+    margin-bottom: 10px;
+    padding: 4px 6px;
+    vertical-align: middle;
+}
+.text-large {
+    height: 34px !important;
+	text-align: left;
+}
+.icon-envelope-alt:before {
+    content:"\f003";
+}
+.icon-large:before {
+    font-size: 1.33333em;
+    vertical-align: -10%;
+}
+.btn.btn-action {
+    background-color: #0663A2;
+    border: medium none;
+    color: #fff;
+	border-radius: 4px;
+	padding:  11px 0 ;
+	font-weight: 300 !important;
+    text-shadow: none;
+	 font-size: 17.5px;
+}
+.btn-block {
+    box-sizing: border-box;
+    display: block;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+	
+}
+
+a {
+    color: #08c;
+    text-decoration: none;
+	font-size: 14px;
+    line-height: 20px;
+}
+.alert-error {
+    background-color: #f2dede;
+    border-color: #eed3d7;
+    color: #0663A2;
+	border-radius: 4px;
+	margin-bottom: 20px;
+	padding: 8px 35px 8px 14px;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.alert .close {
+    line-height: 20px;
+    position: relative;
+    right: -21px;
+    top: -2px;
+}
+button.close {
+    background: transparent none repeat scroll 0 0;
+    border: 0 none;
+    cursor: pointer;
+    padding: 0;
+}
+.close {
+    color: #000;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 20px;
+    opacity: 0.2;
+    text-shadow: 0 1px 0 #fff;
+}
+input[disabled]{
+    background-color: #eee;
+	cursor: not-allowed;
+}

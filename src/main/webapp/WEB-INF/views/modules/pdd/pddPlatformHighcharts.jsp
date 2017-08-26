@@ -1,6 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ include file="/WEB-INF/views/include/taglib.jsp" %>
-<%--<%@ include file="/WEB-INF/views/include/highcharts.jsp"%>--%>
 <html>
 <head>
     <title>平台报表管理</title>

@@ -7,7 +7,13 @@ import java.util.List;
 
 //import com.thinkgem.jeesite.modules.pdd.dao.PddOrderDao;
 //import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
+import com.thinkgem.jeesite.modules.pdd.dao.PddEmailDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddExpressDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
 import com.thinkgem.jeesite.modules.pdd.dao.PddPlatformDao;
+import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
+import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
@@ -41,6 +47,10 @@ public class UserUtils {
 	private static RoleDao roleDao = SpringContextHolder.getBean(RoleDao.class);
 	private static MenuDao menuDao = SpringContextHolder.getBean(MenuDao.class);
 	private static AreaDao areaDao = SpringContextHolder.getBean(AreaDao.class);
+	private static PddEmailDao pddEmailDao = SpringContextHolder.getBean(PddEmailDao.class);
+	private static PddExpressDao pddExpressDao = SpringContextHolder.getBean(PddExpressDao.class);
+	private static PddPhoneDao pddPhoneDao = SpringContextHolder.getBean(PddPhoneDao.class);
+	private static PddPlatformDao pddPlatformDao = SpringContextHolder.getBean(PddPlatformDao.class);
 	private static OfficeDao officeDao = SpringContextHolder.getBean(OfficeDao.class);
 
 	public static final String USER_CACHE = "userCache";
@@ -68,6 +78,11 @@ public class UserUtils {
 				return null;
 			}
 			user.setRoleList(roleDao.findList(new Role(user)));
+			user.setPddEmailList(pddEmailDao.findList(new PddEmail(user)));
+			user.setPddExpressList(pddExpressDao.findList(new PddExpress(user)));
+			user.setPddPhoneList(pddPhoneDao.findList(new PddPhone(user)));
+			user.setPddPlatformList(pddPlatformDao.findList(new PddPlatform(user)));
+
 			CacheUtils.put(USER_CACHE, USER_CACHE_ID_ + user.getId(), user);
 			CacheUtils.put(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getLoginName(), user);
 		}
@@ -87,6 +102,11 @@ public class UserUtils {
 				return null;
 			}
 			user.setRoleList(roleDao.findList(new Role(user)));
+			user.setPddEmailList(pddEmailDao.findList(new PddEmail(user)));
+			user.setPddExpressList(pddExpressDao.findList(new PddExpress(user)));
+			user.setPddPhoneList(pddPhoneDao.findList(new PddPhone(user)));
+			user.setPddPlatformList(pddPlatformDao.findList(new PddPlatform(user)));
+
 			CacheUtils.put(USER_CACHE, USER_CACHE_ID_ + user.getId(), user);
 			CacheUtils.put(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getLoginName(), user);
 		}

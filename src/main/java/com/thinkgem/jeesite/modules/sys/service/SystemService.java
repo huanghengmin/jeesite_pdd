@@ -8,6 +8,14 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.thinkgem.jeesite.modules.pdd.dao.PddEmailDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddExpressDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
+import com.thinkgem.jeesite.modules.pdd.dao.PddPlatformDao;
+import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
+import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.apache.shiro.session.Session;
@@ -67,6 +75,18 @@ public class SystemService extends BaseService implements InitializingBean {
 
 	@Autowired
 	private IdentityService identityService;
+
+	@Autowired
+	private PddExpressDao pddExpressDao;
+
+	@Autowired
+	private PddEmailDao pddEmailDao;
+
+	@Autowired
+	private PddPhoneDao pddPhoneDao;
+
+	@Autowired
+	private PddPlatformDao pddPlatformDao;
 
 	//-- User Service --//
 	
@@ -158,6 +178,39 @@ public class SystemService extends BaseService implements InitializingBean {
 //			systemRealm.clearAllCachedAuthorizationInfo();
 		}
 	}
+
+	@Transactional(readOnly = false)
+	public void saveRegisterUser(User user) {
+		if (StringUtils.isBlank(user.getId())){
+			user.preRegisterInsert(user);
+			userDao.insert(user);
+		}
+		if (StringUtils.isNotBlank(user.getId())){
+			// 更新用户与角色关联
+			userDao.deleteUserRole(user);
+			if (user.getRoleList() != null && user.getRoleList().size() > 0){
+				userDao.insertUserRole(user);
+			}else{
+				throw new ServiceException(user.getLoginName() + "没有设置角色！");
+			}
+			// 将当前用户同步到Activiti
+			saveActivitiUser(user);
+			// 清除用户缓存
+			UserUtils.clearCache(user);
+//			// 清除权限缓存
+//			systemRealm.clearAllCachedAuthorizationInfo();
+		}
+	}
+
+	@Transactional(readOnly = false)
+	public void updateUserSet(User user) {
+		user.preUpdate();
+		userDao.updateUserSet(user);
+		// 清除用户缓存
+		UserUtils.clearCache(user);
+//		// 清除权限缓存
+//		systemRealm.clearAllCachedAuthorizationInfo();
+	}
 	
 	@Transactional(readOnly = false)
 	public void updateUserInfo(User user) {
@@ -172,6 +225,11 @@ public class SystemService extends BaseService implements InitializingBean {
 	@Transactional(readOnly = false)
 	public void deleteUser(User user) {
 		userDao.delete(user);
+		pddEmailDao.delete(new PddEmail(user));
+		pddExpressDao.delete(new PddExpress(user));
+		pddPhoneDao.delete(new PddPhone(user));
+		pddPlatformDao.delete(new PddPlatform(user));
+
 		// 同步到Activiti
 		deleteActivitiUser(user);
 		// 清除用户缓存
@@ -257,6 +315,10 @@ public class SystemService extends BaseService implements InitializingBean {
 	}
 	
 	public List<Role> findAllRole(){
+		return UserUtils.getRoleList();
+	}
+
+	public List<Role> findAllRegisterRole(){
 		return UserUtils.getRoleList();
 	}
 	

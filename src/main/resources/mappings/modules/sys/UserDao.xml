@@ -80,6 +80,11 @@
 		a.update_by AS "updateBy.id",
 		a.update_date,
 		a.del_flag,
+		a.pull_remand AS "pullRemand",
+		a.second_Remand AS "secondRemand",
+		a.order_cycle AS "orderCycle",
+		a.phone_remand AS "phoneRemand",
+		a.email_remand AS "emailRemand",
     	c.name AS "company.name",
     	c.parent_id AS "company.parent.id",
     	c.parent_ids AS "company.parentIds",
@@ -315,6 +320,17 @@
 			update_date = #{updateDate}, 
 			remarks = #{remarks},
 			photo = #{photo}
+		WHERE id = #{id}
+	</update>
+
+	<!-- 更新用户信息  -->
+	<update id="updateUserSet">
+		UPDATE sys_user SET
+			pull_remand = #{pullRemand},
+			second_Remand = #{secondRemand},
+			order_cycle = #{orderCycle},
+			phone_remand = #{phoneRemand},
+			email_remand = #{emailRemand}
 		WHERE id = #{id}
 	</update>
 	

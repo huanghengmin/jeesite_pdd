@@ -25,10 +25,22 @@ import java.security.MessageDigest;
  */
 
 public class KdniaoSubscribeAPI {
+    private String appKey;
+    private String eBusinessID;
 
-    //DEMO
+    //请求URL
+    private static final String reqURL = "http://api.kdniao.cc/api/dist";
+
+    public KdniaoSubscribeAPI(String eBusinessID, String appKey) {
+        this.eBusinessID = eBusinessID;
+        this.appKey = appKey;
+    }
+
+    //示例
     public static void main(String[] args) {
-        KdniaoSubscribeAPI api = new KdniaoSubscribeAPI();
+        String EBusinessID = "1301687";
+        String AppKey = "aece4f2c-bb84-4e5b-87a3-258f090dbae7";
+        KdniaoSubscribeAPI api = new KdniaoSubscribeAPI(EBusinessID, AppKey);
         try {
             String result = api.orderTracesSubByJson();
             System.out.print(result);
@@ -38,21 +50,13 @@ public class KdniaoSubscribeAPI {
         }
     }
 
-    //电商ID
-    private String EBusinessID="1290729";
-    //电商加密私钥，快递鸟提供，注意保管，不要泄漏
-    private String AppKey="c662a7b7-6669-455e-8860-3b1e55b41222";
-    //测试请求url
-//    private String ReqURL = "http://testapi.kdniao.cc:8081/api/dist";
-    //正式请求url
-    private String ReqURL = "http://api.kdniao.cc/api/dist";
-
     /**
      * Json方式  物流信息订阅
      * @throws Exception
      */
     public String orderTracesSubByJson() throws Exception{
-        String requestData="{'OrderCode': 'SF201608081055208281'," +
+        String requestData="{" +
+                "'OrderCode': 'SF201608081055208281'," +
                 "'ShipperCode':'SF'," +
                 "'LogisticCode':'3100707578976'," +
                 "'PayType':1," +
@@ -79,15 +83,22 @@ public class KdniaoSubscribeAPI {
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("RequestData", urlEncoder(requestData, "UTF-8"));
-        params.put("EBusinessID", EBusinessID);
+        params.put("EBusinessID", eBusinessID);
         params.put("RequestType", "1008");
-        String dataSign=encrypt(requestData, AppKey, "UTF-8");
+        String dataSign=encrypt(requestData, appKey, "UTF-8");
         params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
         params.put("DataType", "2");
 
-        String result=sendPost(ReqURL, params);
+        String result=sendPost(reqURL, params);
 
-        //根据公司业务处理返回的信息......
+
+        /*{
+            "EBusinessID": "1151847",
+                "UpdateTime": "2016-08-09 16:42:38",
+                "Success": true,
+                "Reason": ""
+        }*/
+
 
         return result;
     }
@@ -140,8 +151,7 @@ public class KdniaoSubscribeAPI {
      * @return DataSign签名
      */
     @SuppressWarnings("unused")
-    private String encrypt (String content, String keyValue, String charset) throws UnsupportedEncodingException, Exception
-    {
+    private String encrypt (String content, String keyValue, String charset) throws UnsupportedEncodingException, Exception {
         if (keyValue != null)
         {
             return base64(MD5(content + keyValue, charset), charset);
@@ -187,9 +197,7 @@ public class KdniaoSubscribeAPI {
                     param.append(entry.getKey());
                     param.append("=");
                     param.append(entry.getValue());
-                    System.out.println(entry.getKey()+":"+entry.getValue());
                 }
-                System.out.println("param:"+param.toString());
                 out.write(param.toString());
             }
             // flush输出流的缓冲

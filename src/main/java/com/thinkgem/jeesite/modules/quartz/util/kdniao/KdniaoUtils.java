@@ -9,12 +9,12 @@ import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
  */
 public class KdniaoUtils {
 
-    public static String sync(String tracking_number) {
+    public static String sync(String tracking_number,String eBusinessID,String appKey) {
 
         StringBuilder sb = new StringBuilder();
         if (tracking_number != null && tracking_number.length() > 0) {
 
-            KdApiOrderDistinguish api = new KdApiOrderDistinguish();
+            KdApiOrderDistinguish api = new KdApiOrderDistinguish(eBusinessID,appKey);
             try {
                 String result = api.getOrderTracesByJson(tracking_number);
                 //System.out.println("RESULT:"+result);
@@ -34,7 +34,7 @@ public class KdniaoUtils {
                     JSONObject jsonObject = (JSONObject) object1.get(0);
                     //sb.append("快递公司：" + jsonObject.get("ShipperName")).append("\n");
 
-                    KdniaoTrackQueryAPI qapi = new KdniaoTrackQueryAPI();
+                    KdniaoTrackQueryAPI qapi = new KdniaoTrackQueryAPI(eBusinessID,appKey);
                     String qresult = qapi.getOrderTracesByJson(String.valueOf(jsonObject.get("ShipperCode")), tracking_number);
                     //System.out.println("QRESUT:"+qresult);
 
@@ -84,6 +84,10 @@ public class KdniaoUtils {
 
 
     public static void main(String args[])throws Exception{
-        sync("3335894453552");
+        //电商ID
+        String EBusinessID="1290729";
+        //电商加密私钥，快递鸟提供，注意保管，不要泄漏
+        String AppKey="c662a7b7-6669-455e-8860-3b1e55b41222";
+        sync("3335894453552",EBusinessID,AppKey);
     }
 }

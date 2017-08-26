@@ -8,6 +8,10 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
+import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
+import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
@@ -49,10 +53,20 @@ public class User extends DataEntity<User> {
 	
 	private String oldLoginIp;	// 上次登陆IP
 	private Date oldLoginDate;	// 上次登陆日期
+
+	private Integer pullRemand; //揽件提醒
+	private Integer secondRemand;//二次揽件提醒
+	private Integer orderCycle;		//订单同步周期
+	private Integer phoneRemand;		// 短信提醒
+	private Integer emailRemand;		// 邮箱提醒
 	
 	private Role role;	// 根据角色查询用户条件
 	
 	private List<Role> roleList = Lists.newArrayList(); // 拥有角色列表
+	private List<PddEmail> pddEmailList = Lists.newArrayList();		// 子表列表
+	private List<PddPhone> pddPhoneList = Lists.newArrayList();		// 子表列表
+	private List<PddExpress> pddExpressList = Lists.newArrayList();		// 子表列表
+	private List<PddPlatform> pddPlatformList = Lists.newArrayList();		// 子表列表
 
 	public User() {
 		super();
@@ -320,5 +334,77 @@ public class User extends DataEntity<User> {
 	@Override
 	public String toString() {
 		return id;
+	}
+
+	public List<PddEmail> getPddEmailList() {
+		return pddEmailList;
+	}
+
+	public void setPddEmailList(List<PddEmail> pddEmailList) {
+		this.pddEmailList = pddEmailList;
+	}
+
+	public List<PddPhone> getPddPhoneList() {
+		return pddPhoneList;
+	}
+
+	public void setPddPhoneList(List<PddPhone> pddPhoneList) {
+		this.pddPhoneList = pddPhoneList;
+	}
+
+	public List<PddExpress> getPddExpressList() {
+		return pddExpressList;
+	}
+
+	public void setPddExpressList(List<PddExpress> pddExpressList) {
+		this.pddExpressList = pddExpressList;
+	}
+
+	public List<PddPlatform> getPddPlatformList() {
+		return pddPlatformList;
+	}
+
+	public void setPddPlatformList(List<PddPlatform> pddPlatformList) {
+		this.pddPlatformList = pddPlatformList;
+	}
+
+	public Integer getPullRemand() {
+		return pullRemand;
+	}
+
+	public void setPullRemand(Integer pullRemand) {
+		this.pullRemand = pullRemand;
+	}
+
+	public Integer getSecondRemand() {
+		return secondRemand;
+	}
+
+	public void setSecondRemand(Integer secondRemand) {
+		this.secondRemand = secondRemand;
+	}
+
+	public Integer getOrderCycle() {
+		return orderCycle;
+	}
+
+	public void setOrderCycle(Integer orderCycle) {
+		this.orderCycle = orderCycle;
+	}
+
+	public Integer getPhoneRemand() {
+		return phoneRemand;
+	}
+
+	public void setPhoneRemand(Integer phoneRemand) {
+		this.phoneRemand = phoneRemand;
+	}
+
+	public Integer getEmailRemand() {
+		return emailRemand;
+	}
+
+	public void setEmailRemand(Integer emailRemand) {
+		this.emailRemand = emailRemand;
 	}
 }

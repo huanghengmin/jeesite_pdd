@@ -6,6 +6,8 @@ package com.thinkgem.jeesite.modules.pdd.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.thinkgem.jeesite.modules.pdd.bean.DataBean;
+import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoUtils;
@@ -17,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.thinkgem.jeesite.common.config.Global;
@@ -59,12 +62,21 @@ public class PddOrderController extends BaseController {
 	@RequiresPermissions("pdd:pddOrder:view")
 	@RequestMapping(value = {"list", ""})
 	public String list(PddOrder pddOrder, HttpServletRequest request, HttpServletResponse response, Model model) {
-		PddPlatform pddPlatform = new PddPlatform(UserUtils.getUser());
-		pddOrder.setPddPlatform(pddPlatform);
-		List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddPlatform);
-		model.addAttribute("pddPlatformList", pddPlatformList);
-		Page<PddOrder> page = pddOrderService.findPage(new Page<PddOrder>(request, response), pddOrder);
-		model.addAttribute("page", page);
+		if(pddOrder.getPddPlatform()!=null){
+			Page<PddOrder> page =pddOrderService.findPage(new Page<PddOrder>(request, response), pddOrder);
+			model.addAttribute("page", page);
+			List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddOrder.getPddPlatform());
+			model.addAttribute("pddPlatformList", pddPlatformList);
+
+		}else {
+			PddPlatform pddPlatform = new PddPlatform(UserUtils.getUser());
+			Page<PddOrder> page = pddOrderService.findPageByUser(new Page<PddOrder>(request, response), pddOrder);
+			model.addAttribute("page", page);
+			pddOrder.setPddPlatform(pddPlatform);
+			List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddPlatform);
+			model.addAttribute("pddPlatformList", pddPlatformList);
+		}
+
 		return "modules/pdd/pddOrderList";
 	}
 
@@ -106,10 +118,18 @@ public class PddOrderController extends BaseController {
 			return form(pddOrder, model);
 		}
 		String string = pddOrder.getTrackingNumber();
-		String msg = KdniaoUtils.sync(string);
-		pddOrder.setLogisticInfo(msg);
-		pddOrder.setEndUpdatedAt(new Date());
-		pddOrderService.save(pddOrder);
+		//List<PddExpress> pddExpresses = pddOrder.getPddPlatform().getPddExpressList();
+		/*if(pddExpresses!=null&&pddExpresses.size()>0){
+			for (PddExpress pddExpres:pddExpresses) {
+				String msg = KdniaoUtils.sync(string, pddExpres.getEbusinessid(),pddExpres.getApikey());
+				pddOrder.setLogisticInfo(msg);
+				pddOrder.setEndUpdatedAt(new Date());
+				pddOrderService.save(pddOrder);
+				break;
+			}
+		}*/
+
+
 		//同步快递
 		addMessage(redirectAttributes, "同订单信息成功");
 		return "redirect:"+Global.getAdminPath()+"/pdd/pddOrder/?repage";
@@ -121,6 +141,12 @@ public class PddOrderController extends BaseController {
 		pddOrderService.delete(pddOrder);
 		addMessage(redirectAttributes, "删除订单管理成功");
 		return "redirect:"+Global.getAdminPath()+"/pdd/pddOrder/?repage";
+	}
+
+	@RequestMapping({"/pull"})
+	@ResponseBody
+	public String pull() {
+		return null;
 	}
 
 }
