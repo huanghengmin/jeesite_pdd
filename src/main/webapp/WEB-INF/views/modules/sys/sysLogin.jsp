@@ -149,7 +149,11 @@
 		记住我（公共场所慎用）</label>
 
 	<div  class="input-block-level required">
-		<a href="${ctx}/register">创建一个新账户</a>&nbsp;<%--|&nbsp;<a
+		<a href="${ctx}/register/index">手机注册</a>&nbsp;
+		<a href="${ctx}/register/emailIndex">邮件注册</a>&nbsp;
+
+
+		<%--|&nbsp;<a
             href="${ctx}/forget">忘记密码?</a>--%>
 
 	</div>

@@ -1,4 +1,4 @@
-package com.thinkgem.jeesite.modules.quartz.util;
+package com.thinkgem.jeesite.modules.quartz.util.sms;
 
 import org.junit.Test;
 

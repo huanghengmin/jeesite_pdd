@@ -9,7 +9,7 @@ import org.activiti.engine.impl.persistence.entity.UserIdentityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Activiti User Entity Service Factory
+ * Activiti User KdniaoTrackQueryAPIEntity Service Factory
  * @author ThinkGem
  * @version 2013-11-03
  */

@@ -54,4 +54,37 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 		pddOrderPage.setList(pddOrderDao.findListByUser(pddOrder));
 		return pddOrderPage;
     }
+
+	/**
+	 * 更新数据
+	 * @param entity
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int updateByOrderSn(PddOrder entity){
+		return pddOrderDao.updateByOrderSn(entity);
+	};
+
+	/**
+	 * 获取单条数据
+	 * @param order_sn
+	 * @return
+	 */
+	public PddOrder getByOrderSn(String order_sn){
+		return pddOrderDao.getByOrderSn(order_sn);
+	}
+
+
+	public PddOrder getByLogisticCode(String logisticCode){
+		return pddOrderDao.getByLogisticCode(logisticCode);
+	}
+
+	@Transactional(readOnly = false)
+	public PddOrder updateByLogisticCode(PddOrder entity){
+		return pddOrderDao.updateByLogisticCode(entity);
+	}
+
+	public long findCount(PddOrder entity){
+		return pddOrderDao.findCount(entity);
+	}
 }

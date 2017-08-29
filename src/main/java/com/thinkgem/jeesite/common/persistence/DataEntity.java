@@ -57,24 +57,11 @@ public abstract class DataEntity<T> extends BaseEntity<T> {
 		this.createDate = this.updateDate;
 	}
 
-	//@Override
-	public void preRegisterInsert(User user){
-		user.setId(IdGen.uuid());
-		if (StringUtils.isNotBlank(user.getId())){
-			this.updateBy = user;
-			this.createBy = user;
-		}
-		this.updateDate = new Date();
-		this.createDate = this.updateDate;
-	}
-
-	//@Override
 	public void preInsert(User user){
 		// 不限制ID为UUID，调用setIsNewRecord()使用自定义ID
 		if (!this.isNewRecord){
 			setId(IdGen.uuid());
 		}
-		//User user = UserUtils.getUser();
 		if (StringUtils.isNotBlank(user.getId())){
 			this.updateBy = user;
 			this.createBy = user;
@@ -89,6 +76,13 @@ public abstract class DataEntity<T> extends BaseEntity<T> {
 	@Override
 	public void preUpdate(){
 		User user = UserUtils.getUser();
+		if (StringUtils.isNotBlank(user.getId())){
+			this.updateBy = user;
+		}
+		this.updateDate = new Date();
+	}
+
+	public void preUpdate(User user){
 		if (StringUtils.isNotBlank(user.getId())){
 			this.updateBy = user;
 		}

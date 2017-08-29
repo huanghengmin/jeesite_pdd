@@ -410,7 +410,6 @@
 			<version>3.2.3</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>com.aliyuncs.dysmsapi</groupId>
 			<artifactId>aliyun-java-sdk-dysmsapi</artifactId>
@@ -429,7 +428,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- GENERAL UTILS begin -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -637,7 +636,7 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/UserAgentUtils-1.13.jar</systemPath>
 		</dependency>
-		
+
 		<!-- 自定义jar依赖包
 		<dependency>
 			<groupId>com.thinkgem.jeesite</groupId>

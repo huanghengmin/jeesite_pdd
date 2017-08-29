@@ -5,43 +5,54 @@
     <title>平台报表管理</title>
     <meta name="decorator" content="default"/>
     <script type="text/javascript">
-        var contextPath = '<c:out value="${pageContext.request.contextPath}"/>';
         $(document).ready(function () {
-
-            function chaxun() {
-                var arr = [];
-                var data = [{
-                    "title": "教师绩效考核结果分析",
-                    "data": [{"num": 0, "name": "0-20分"}, {"num": 1, "name": "21-40分"}, {"num": 0, "name": "41-60分"}, {
-                        "num": 0,
-                        "name": "61-80分"
-                    }, {"num": 0, "name": "81-100分"}]
-                }];
-
-                //$(data.data).each(function(index,item){
-                arr.push(["0-20分", 22]);
-                arr.push(["0-44440分", 12]);
-                //});
-                chart.series[0].setData(arr);//数据填充到highcharts上面
-
-
-            };
             $.ajax({
-                url: contextPath + '/linechart4',
-                dataType: 'json',
-                success: function (data) {
-                    chart = new Highcharts.Chart({
+                url:'${ctx}/pdd/pddPlatform/report?id=${pddPlatform.id}',
+                type: "post",
+                contentType : 'application/json;charset=utf-8',
+                cache: false,
+                success: function(data){
+                    var countValue = data.countValue;
+
+                    $("#countValue").text(countValue);
+
+                    var dataBean_categories = data.DataBean.categories;
+                    var dataBean_series = data.DataBean.series;
+                    var dataBean_divId = data.DataBean.divId;
+                    var dataBean_title = data.DataBean.title;
+                    var dataBean_yAxisTitle = data.DataBean.yAxisTitle;
+                    var dataBean_xAxisTitle = data.DataBean.xAxisTitle;
+
+
+                    var DataBeanLine_categories = data.DataBeanLine.categories;
+                    var DataBeanLine_series = data.DataBeanLine.series;
+                    var DataBeanLine_divId = data.DataBeanLine.divId;
+                    var DataBeanLine_title = data.DataBeanLine.title;
+                    var DataBeanLine_yAxisTitle = data.DataBeanLine.yAxisTitle;
+                    var DataBeanLine_xAxisTitle = data.DataBeanLine.xAxisTitle;
+
+
+                    var pie_title = data.pieBean.title;
+                    var pie_data = data.pieBean.data;
+                    var pie_divId = data.pieBean.divId;
+
+                    var arr = [];
+                    $.each(pie_data, function (i, seriesItem) {
+                        arr.push([seriesItem.name, seriesItem.number]);
+                    });
+
+                     options_pie = {
                         chart: {
-                            renderTo: 'chart1-container',
                             plotBackgroundColor: null,
                             plotBorderWidth: null,
                             plotShadow: false
                         }, title: {
-                            text: '教师绩效分析图'
+                            text: pie_title
                         },
                         tooltip: {
                             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
                         },
+                         credits: { enabled: false},
                         plotOptions: {
                             pie: {
                                 allowPointSelect: true,
@@ -57,26 +68,78 @@
                         },
                         series: [{
                             type: 'pie',
-                            name: '所占比例',
+                            name: pie_title,
+                            data:arr
                         }]
-                    });
+                    }
 
-                    chaxun();
-
-
-                    var options = {
+                    options_chart = {
                         chart: {
                             type: 'column'
                         },
                         title: {
-                            text: '水果消费情况'
+                            text: dataBean_title
                         },
+                        credits: { enabled: false},
                         xAxis: {
-                            categories: []
+                            categories: dataBean_categories,
+                            title: {
+                                text: dataBean_xAxisTitle
+                            }
                         },
                         yAxis: {
                             title: {
-                                text: '单位'
+                                text: dataBean_yAxisTitle
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return '<b>' + this.series.name + '</b><br/>' +
+                                    this.x + ': ' + this.y;
+                            }
+                        },
+                        legend: {
+                            layout: 'vertical',
+                            align: 'right',
+                            verticalAlign: 'top',
+                            x: -10,
+                            y: 100,
+                            borderWidth: 0
+                        },
+                        series: []
+                    }
+
+                    $.each(dataBean_series, function (i, seriesItem) {
+                        var series = {
+                            data: []
+                        };
+                        series.name = seriesItem.name;
+                        series.color = seriesItem.color;
+
+                        $.each(seriesItem.data, function (j, seriesItemData) {
+                            series.data.push(parseFloat(seriesItemData));
+                        });
+
+                        options_chart.series[i] = series;
+                    });
+
+                     options_line_chart = {
+                        chart: {
+                            type: 'line'
+                        },
+                        title: {
+                            text: DataBeanLine_title
+                        },
+                         credits: { enabled: false},
+                        xAxis: {
+                             title: {
+                                 text: DataBeanLine_xAxisTitle
+                             },
+                            categories: DataBeanLine_categories
+                        },
+                        yAxis: {
+                            title: {
+                                text: DataBeanLine_yAxisTitle
                             }
                         },
                         tooltip: {
@@ -97,14 +160,7 @@
                     }
 
 
-                    var categories = data.categories;
-                    var title = data.title;
-                    var yTitle = data.yAxisTitle;
-                    var xTitle = data.xAxisTitle;
-                    var divId = data.divId;
-
-                    $.each(data.series, function (i, seriesItem) {
-                        console.log(seriesItem);
+                    $.each(DataBeanLine_series, function (i, seriesItem) {
                         var series = {
                             data: []
                         };
@@ -112,80 +168,64 @@
                         series.color = seriesItem.color;
 
                         $.each(seriesItem.data, function (j, seriesItemData) {
-                            console.log("Data (" + j + "): " + seriesItemData);
                             series.data.push(parseFloat(seriesItemData));
                         });
 
-                        options.series[i] = series;
+                        options_line_chart.series[i] = series;
                     });
 
-                    new Highcharts.Chart('chart2-container', options);
+                    new Highcharts.Chart(pie_divId, options_pie);
+                    new Highcharts.Chart(dataBean_divId, options_chart);
+                    new Highcharts.Chart(DataBeanLine_divId, options_line_chart);
 
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    alert(xhr.status);
-                    alert(thrownError);
-                },
-                cache: false
+                error: function(){
+                    alert('请求服务器出错......');
+                }
             });
         });
-
-
     </script>
 </head>
 <body>
-<%--<ul class="nav nav-tabs">
-    <shiro:hasPermission name="pdd:pddPlatform:view"><li><a href="${ctx}/pdd/pddPlatform/highCharts">平台报表</a></li></shiro:hasPermission>
-</ul>--%>
-
 <div id="wrap">
     <!-- NAVBAR -->
-    <!-- Docs master nav -->
-    <div class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <div class="nav-collapse collapse" id="navbar-main">
-                <ul class="nav navbar-nav pull-left">
-                </ul>
-            </div>
-        </div>
-    </div>
-    <br/><br/><br/><br/>
-
     <!-- CONTAINER -->
     <div class="container">
+        <h3 class="panel-title"><div id="countValue"></div></h3>
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="panel panel-danger">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Highchart Chart 1</h3>
+                                <h3 class="panel-title">数据比例表</h3>
                             </div>
-                            <div id="chart1-container"
+                            <div id="pie_container"
+                                 style="min-width:400px;height:400px;  height: 300px; margin: 0 auto"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-danger">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">柱状图表</h3>
+                            </div>
+                            <div id="container"
                                  style="min-width:400px;height:400px;  height: 300px; margin: 0 auto"></div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="panel panel-primary">
                             <div class="panel-heading">
-                                <h3 class="panel-title">Highchart Chart 2</h3>
+                                <h3 class="panel-title">线性图表</h3>
                             </div>
-                            <div id="chart2-container"
+                            <div id="line_container"
                                  style="min-width:400px;height:400px;   height: 300px; margin: 0 auto"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div><!--/CONTAINER -->
-    <div id="push"></div>
 </div><!--/WRAP -->
 </body>
 </html>

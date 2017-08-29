@@ -6,11 +6,15 @@ package com.thinkgem.jeesite.modules.pdd.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.thinkgem.jeesite.modules.pdd.bean.DataBean;
+import com.alibaba.fastjson.JSON;
+import com.thinkgem.jeesite.common.utils.DateUtils;
 import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
-import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoUtils;
+import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdApiOrderDistinguish;
+import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
+import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.*;
+import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,26 +116,56 @@ public class PddOrderController extends BaseController {
 	}
 
 	@RequiresPermissions("pdd:pddOrder:edit")
-	@RequestMapping(value = "express")
+	@RequestMapping(value = "express") //手动同步订单
 	public String express(PddOrder pddOrder, Model model, RedirectAttributes redirectAttributes) {
 		if (!beanValidator(model, pddOrder)){
 			return form(pddOrder, model);
 		}
 		String string = pddOrder.getTrackingNumber();
-		//List<PddExpress> pddExpresses = pddOrder.getPddPlatform().getPddExpressList();
-		/*if(pddExpresses!=null&&pddExpresses.size()>0){
-			for (PddExpress pddExpres:pddExpresses) {
-				String msg = KdniaoUtils.sync(string, pddExpres.getEbusinessid(),pddExpres.getApikey());
-				pddOrder.setLogisticInfo(msg);
-				pddOrder.setEndUpdatedAt(new Date());
-				pddOrderService.save(pddOrder);
-				break;
+		User user = UserUtils.getUser();
+		List<PddExpress> pddExpresses = user.getPddExpressList();
+		if(pddExpresses!=null&&pddExpresses.size()>0){
+			for (PddExpress pddExpres:pddExpresses) {//需要判断账号是否超过3000次，如超过换下一个几账号查询，没有时提示
+				KdApiOrderDistinguish api = new KdApiOrderDistinguish(pddExpres.getEbusinessid(),pddExpres.getApikey());
+				try {
+					String data = api.getOrderTracesByJson(string);
+					KdApiOrderDistinguishEntity kdApiOrderDistinguishEntity = JSON.parseObject(data, KdApiOrderDistinguishEntity.class);//Weibo类在下边定义
+					//没有物流轨迹的为false
+					if (kdApiOrderDistinguishEntity.isSuccess()) {
+						List<Shippers> shippers = kdApiOrderDistinguishEntity.getShippers();
+						for (Shippers shippers1 :shippers){
+							KdniaoTrackQueryAPI qapi = new KdniaoTrackQueryAPI(pddExpres.getEbusinessid(),pddExpres.getApikey());
+							String data1 = qapi.getOrderTracesByJson(shippers1.getShipperCode(), pddOrder.getTrackingNumber());
+							KdniaoTrackQueryAPIEntity kdniaoTrackQueryAPIEntity = JSON.parseObject(data1, KdniaoTrackQueryAPIEntity.class);
+                            if(kdniaoTrackQueryAPIEntity.isSuccess()){
+                            	int status = kdniaoTrackQueryAPIEntity.getState();//物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
+								if(status==3){
+									if(pddOrder.getOrderStatus()!=3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
+										pddOrder.setOrderStatus(3);
+									}
+								}
+                            	pddOrder.setPackageStatus(status);
+								List<Traces> traces = kdniaoTrackQueryAPIEntity.getTraces();
+								StringBuilder sb = new StringBuilder();
+								for(Traces traces1:traces){
+									sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
+								}
+								pddOrder.setLogisticInfo(sb.toString());
+								pddOrder.setUpdatedAt(new Date()); //最后更新时间
+								pddOrderService.save(pddOrder);
+								//同步快递
+								addMessage(redirectAttributes, "同步订单信息成功");
+								return "redirect:"+Global.getAdminPath()+"/pdd/pddOrder/?repage";
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-		}*/
-
-
+		}
 		//同步快递
-		addMessage(redirectAttributes, "同订单信息成功");
+		addMessage(redirectAttributes, "同步订单信息失败");
 		return "redirect:"+Global.getAdminPath()+"/pdd/pddOrder/?repage";
 	}
 	
@@ -145,8 +179,43 @@ public class PddOrderController extends BaseController {
 
 	@RequestMapping({"/pull"})
 	@ResponseBody
-	public String pull() {
-		return null;
+	public String pull(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String EBusinessID=null;
+		String RequestData = request.getParameter("RequestData");
+		String RequestType = request.getParameter("RequestType");
+		String DataSign = request.getParameter("DataSign");
+		//解析数据
+		if(RequestType.equals(ResponseData.type_101)){ // 推送数据
+			ResponseData data = JSON.parseObject(RequestData, ResponseData.class);//Weibo类在下边定义
+			if(data!=null&&data.getData()!=null) {
+				List<Data> data1 = data.getData();
+				for(Data d:data1){
+					if(d.isSuccess()){//成功
+						PddOrder pddOrder = pddOrderService.getByLogisticCode(d.getLogisticCode());
+						if(pddOrder!=null) {
+							int status = d.getState();//物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
+							if (status == 3) {
+								if (pddOrder.getOrderStatus() != 3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
+									pddOrder.setOrderStatus(3);
+								}
+							}
+							EBusinessID = d.getEBusinessID();
+							List<Traces> traces = d.getTraces();
+							pddOrder.setPackageStatus(status);
+							StringBuilder sb = new StringBuilder();
+							for (Traces traces1 : traces) {
+								sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
+							}
+							pddOrder.setLogisticInfo(sb.toString());
+							pddOrder.setUpdatedAt(new Date()); //最后更新时间
+							pddOrderService.save(pddOrder);
+						}
+					}
+				}
+			}
+		}
+		String requestData = "{\"EBusinessID\":\""+EBusinessID+"\",\"UpdateTime\":\""+ DateUtils.formatDateTime(new Date())+"\",\"Success\":"+true+",\"Reason\":\"\"}";
+		return requestData;
 	}
 
 }

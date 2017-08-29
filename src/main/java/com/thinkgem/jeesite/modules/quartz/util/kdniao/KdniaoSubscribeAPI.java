@@ -1,5 +1,8 @@
 package com.thinkgem.jeesite.modules.quartz.util.kdniao;
 
+import com.alibaba.fastjson.JSONObject;
+import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.RequestData;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,7 +45,7 @@ public class KdniaoSubscribeAPI {
         String AppKey = "aece4f2c-bb84-4e5b-87a3-258f090dbae7";
         KdniaoSubscribeAPI api = new KdniaoSubscribeAPI(EBusinessID, AppKey);
         try {
-            String result = api.orderTracesSubByJson();
+            String result = api.orderTracesSubByJson("SF","3100707578976");
             System.out.print(result);
 
         } catch (Exception e) {
@@ -54,8 +57,8 @@ public class KdniaoSubscribeAPI {
      * Json方式  物流信息订阅
      * @throws Exception
      */
-    public String orderTracesSubByJson() throws Exception{
-        String requestData="{" +
+    public String orderTracesSubByJson(String shipperCode,String logisticCode) throws Exception{
+        /*String requestData="{" +
                 "'OrderCode': 'SF201608081055208281'," +
                 "'ShipperCode':'SF'," +
                 "'LogisticCode':'3100707578976'," +
@@ -79,7 +82,13 @@ public class KdniaoSubscribeAPI {
                 "'Weight':1.0," +
                 "'Quantity':1," +
                 "'Volume':0.0," +
-                "'Remark':'小心轻放'}";
+                "'Remark':'小心轻放'}";*/
+
+        RequestData requestData1 = new RequestData();
+        requestData1.setShipperCode(shipperCode);
+        requestData1.setLogisticCode(logisticCode);
+
+        String requestData = JSONObject.toJSONString(requestData1);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("RequestData", urlEncoder(requestData, "UTF-8"));

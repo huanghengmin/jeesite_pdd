@@ -1,7 +1,5 @@
 package com.thinkgem.jeesite.modules.quartz.schedule;
 
-import com.thinkgem.jeesite.modules.quartz.util.ScheduleJobEntity;
-import com.thinkgem.jeesite.modules.quartz.util.ScheduleRunnable;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -37,6 +35,7 @@ public class ScheduleJob extends QuartzJobBean {
 			long times = System.currentTimeMillis() - startTime;
 			logger.info("任务执行完毕，任务ID：" + scheduleJobEntity.getJobId() + "  总共耗时：" + times + "毫秒");
 		} catch (Exception e) {
+			e.printStackTrace();
 			// 任务执行总时长
 			long times = System.currentTimeMillis() - startTime;
 			logger.error("任务执行失败，任务ID：" + scheduleJobEntity.getJobId()+",时长："+times, e);

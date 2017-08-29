@@ -4,25 +4,24 @@
 package com.thinkgem.jeesite.modules.sys.web;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Lists;
-import com.thinkgem.jeesite.modules.pdd.dao.PddVcodeDao;
+import com.thinkgem.jeesite.modules.pdd.email.model.Email;
+import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddVcode;
 import com.thinkgem.jeesite.modules.pdd.service.PddVcodeService;
-import com.thinkgem.jeesite.modules.sys.dao.RoleDao;
-import com.thinkgem.jeesite.modules.sys.entity.Office;
 import com.thinkgem.jeesite.modules.sys.entity.Role;
 import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.service.OfficeService;
 import com.thinkgem.jeesite.modules.sys.service.SystemService;
-import com.thinkgem.jeesite.modules.quartz.util.RandNumUtils;
+import com.thinkgem.jeesite.modules.quartz.util.sms.RandNumUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.web.util.WebUtils;
@@ -66,6 +65,9 @@ public class LoginController extends BaseController{
 
 	@Autowired
 	private PddVcodeService pddVcodeService;
+
+	@Autowired
+	private IMailService iMailService;
 	
 	/**
 	 * 管理登录
@@ -102,14 +104,14 @@ public class LoginController extends BaseController{
 		return "modules/sys/sysLogin";
 	}
 
-	@RequestMapping(value = "${adminPath}/register")
+	@RequestMapping(value = "${adminPath}/register/register")
 	public String register(HttpServletRequest request, HttpServletResponse response, Model model) {
 		String phone = request.getParameter("phone");
 		String password = request.getParameter("password");
 		String vcode = request.getParameter("vcode");
 		if(phone!=null&&password!=null){
 			PddVcode pddVcode = pddVcodeService.getByPhone(phone);
-			if(pddVcode!=null) {
+			if(pddVcode!=null&&vcode.equals(pddVcode.getVcode())) {
 				User user = new User();
 				// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
 				// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
@@ -126,13 +128,14 @@ public class LoginController extends BaseController{
 				user.setLoginFlag("1");//可登陆
 				user.setDelFlag("0"); //未删除
 				//check vcode
-				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()>1000*60*1){//已过1分钟，需要重新发送
+				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()<1000*60*3){//已过1分钟，需要重新发送
 					// 如果新密码为空，则不更换密码
 					if (StringUtils.isNotBlank(user.getNewPassword())) {
 						user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
 					}
-					if (!(user.getLoginName() != null && systemService.getUserByLoginName(user.getLoginName()) == null)) {
-						addMessage(model, "注册用户'" + user.getLoginName() + "'失败，登录名已存在或登陆名不存在");
+
+					if (!(systemService.getUserByLoginName(user.getLoginName()) == null)){
+						addMessage(model, "注册用户'" + user.getLoginName() + "'失败，手机号已注册，请登陆");
 						return "modules/sys/sysRegister";
 					}
 					// 角色数据有效性验证，过滤不在授权内的角色
@@ -158,15 +161,155 @@ public class LoginController extends BaseController{
 						//UserUtils.getCacheMap().clear();
 					}
 					addMessage(model, "注册用户'" + user.getLoginName() + "'成功");
-					return "redirect:" + adminPath + "/modules/sys/sysRegister";
+					return "modules/sys/sysRegister";
 				}else {
-					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过1分钟，已失效，请重新获取");
+					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过3分钟，已失效，请重新获取");
 					return "modules/sys/sysRegister";
 				}
 			}
-		}addMessage(model, "注册用户失败："+phone);
+		}addMessage(model, "注册用户失败：验证码不匹配"+phone);
 		return "modules/sys/sysRegister";
 	}
+
+
+	@RequestMapping(value = "${adminPath}/register/emailRegister")
+	public String emailRegister(HttpServletRequest request, HttpServletResponse response, Model model) {
+		String email = request.getParameter("email");
+		String password = request.getParameter("password");
+//		String vcode = request.getParameter("vcode");
+		if(email!=null&&password!=null){
+//			PddVcode pddVcode = pddVcodeService.getByEmail(email);
+//			if(pddVcode!=null&&vcode.equals(pddVcode.getVcode())) {
+			User user = new User();
+			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+			// 修正引用赋值问题，不知道为何，Company和Office引用的一个实例地址，修改了一个，另外一个跟着修改。
+			user.setCompany(officeService.get("1")); //公司
+			user.setOffice(officeService.get("2"));   //部门
+			user.setLoginName(email);
+			//String code = String.valueOf(UUID.randomUUID());
+			User u = systemService.getUserByLoginName(user.getLoginName());
+			if (u != null){
+				if(u.getLoginFlag().equals("1")){
+					addMessage(model, "用户'" + user.getLoginName() + "'已激活，请登陆");
+					return "modules/sys/sysRegister";
+				}else {
+					Email mail = new Email();
+					mail.setEmail(new String[]{email});
+					mail.setSubject("激活邮件");
+					mail.setContent("<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1><h3>" +
+							"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+							"点击激活</a></h3>");
+//					mail.setTemplate("welcome");
+
+					try {
+						iMailService.sendHtml(mail);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					systemService.saveUser(u);
+					addMessage(model, "已发送激活链接到邮箱"+user.getLoginName()+"，请激活后登陆");
+					return "modules/sys/sysRegister";
+				}
+			}else {
+				user.setName(email);
+				user.setPassword(password);
+				user.setNewPassword(password);
+
+				user.setNo(email);
+				user.setLoginFlag("0");//不可登陆需要激活
+				user.setDelFlag("0"); //未删除
+				//check vcode
+//				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()<1000*60*3){//已过1分钟，需要重新发送
+				// 如果新密码为空，则不更换密码
+				if (StringUtils.isNotBlank(user.getNewPassword())) {
+					user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
+				}
+
+
+				// 角色数据有效性验证，过滤不在授权内的角色
+				List<Role> roleList = Lists.newArrayList();
+
+				Role role = systemService.getRole("6");
+				roleList.add(role);
+
+//			List<String> roleIdList = new ArrayList<String>();
+//			roleIdList.add("6");//添加普通用户
+
+//			for (Role r : systemService.findAllRole()){
+//				if (roleIdList.contains(r.getId())){
+//					roleList.add(r);
+//				}
+//			}
+
+//				user.setNo(code);
+				user.setRoleList(roleList);
+				// 保存用户信息
+				systemService.saveRegisterUser(user);
+				// 清除当前用户缓存
+				if (user.getLoginName().equals(UserUtils.getUser().getLoginName())) {
+					UserUtils.clearCache();
+					//UserUtils.getCacheMap().clear();
+				}
+
+
+				Email mail = new Email();
+				mail.setEmail(new String[]{email});
+				mail.setSubject("激活邮件");
+				mail.setContent("<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1><h3>" +
+						"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+						"点击激活</a></h3>");
+//					mail.setTemplate("welcome");
+
+				try {
+//					iMailService.send(mail);
+					iMailService.sendHtml(mail);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				addMessage(model, "注册用户'" + user.getLoginName() + "'成功,已发送激活链接到邮箱, 请激活后登陆！");
+				return "modules/sys/sysEmailRegister";
+				/*}else {
+					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过3分钟，已失效，请重新获取");
+					return "modules/sys/sysRegister";*/
+//				}
+				//}
+			}
+		}
+		addMessage(model, "注册用户失败");
+		return "modules/sys/sysEmailRegister";
+	}
+
+
+	@RequestMapping(value = "${adminPath}/register/emailRegisterCode")
+	public String emailRegisterCode(HttpServletRequest request, HttpServletResponse response, Model model) {
+		String email = request.getParameter("email");
+		User u = systemService.getUserByLoginName(email);
+		if(u!=null){
+			if(new Date().getTime()-u.getUpdateDate().getTime()<3*60*1000) {
+				u.setLoginFlag("1");
+				systemService.saveUser(u);
+				addMessage(model, "激活用户成功：请登陆");
+				return "modules/sys/sysLogin";
+			}else {
+				addMessage(model, "激活失败：激活码链接未激活已超过3分钟，激活无效！");
+				return "modules/sys/sysLogin";
+			}
+		}
+		addMessage(model, "激活用户失败：验证码不匹配");
+		return "modules/sys/sysEmailRegister";
+	}
+
+	@RequestMapping(value = "${adminPath}/register/emailIndex")
+	public String emailIndex(HttpServletRequest request, HttpServletResponse response, Model model) {
+		return "modules/sys/sysEmailRegister";
+	}
+
+	@RequestMapping(value = "${adminPath}/register/index")
+	public String index(HttpServletRequest request, HttpServletResponse response, Model model) {
+		return "modules/sys/sysRegister";
+	}
+
 
 	@ResponseBody
 	@RequestMapping(value = "${adminPath}/register/vcode")
@@ -184,9 +327,12 @@ public class LoginController extends BaseController{
 					return "{success:true,msg:'"+msg+"'}";
 				}
 			}else {
+				User user = new User();
+				pddVcode = new PddVcode();
+				pddVcode.setPhone(phone);
 				pddVcode.setVcode(String.valueOf(code));
 				pddVcode.setUpdateTime(new Date());
-				boolean flag = pddVcodeService.insertAndSendCode(pddVcode);
+				boolean flag = pddVcodeService.insertAndSendCode(pddVcode,user);
 				if(flag){
 					String msg = "已发送短信，请注意查收";
 					return "{success:true,msg:'"+msg+"'}";
@@ -195,7 +341,7 @@ public class LoginController extends BaseController{
 		}
 //		return "modules/sys/sysRegister";
 		String msg = "发送短信异常，phone:"+phone;
-		return "{success:true,msg:"+msg+"}";
+		return "{success:false,msg:"+msg+"}";
 	}
 
 

@@ -20,6 +20,8 @@
 				${adminPath}/login = authc
 				${adminPath}/logout = logout
 				${adminPath}/register/** = anon
+				${adminPath}/pdd/pddMail/** = anon
+				${adminPath}/pdd/pddOrder/pull/** = anon
 				${adminPath}/forget/** = anon
 				${adminPath}/** = user
 				/act/editor/** = user

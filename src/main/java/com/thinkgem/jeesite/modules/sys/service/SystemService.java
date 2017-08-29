@@ -182,7 +182,7 @@ public class SystemService extends BaseService implements InitializingBean {
 	@Transactional(readOnly = false)
 	public void saveRegisterUser(User user) {
 		if (StringUtils.isBlank(user.getId())){
-			user.preRegisterInsert(user);
+			user.preInsert(user);
 			userDao.insert(user);
 		}
 		if (StringUtils.isNotBlank(user.getId())){
@@ -601,7 +601,7 @@ public class SystemService extends BaseService implements InitializingBean {
 			identityService.deleteUser(userId);
 		}
 	}
-	
-	///////////////// Synchronized to the Activiti end //////////////////
+
+    ///////////////// Synchronized to the Activiti end //////////////////
 	
 }

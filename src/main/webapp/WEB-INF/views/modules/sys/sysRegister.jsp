@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="${ctxStatic}/login/login.css"/>
     <link rel="stylesheet" href="${ctxStatic}/login/style.css"/>
     <script src="${ctxStatic}/jquery/jquery-1.8.3.min.js" type="text/javascript"></script>
-    <script src="${ctxStatic}/jquery-validation/1.11.1/jquery.validate.js" type="text/javascript"></script>
+    <script src="${ctxStatic}/jquery-validation/1.11.1/jquery.validate.min.js" type="text/javascript"></script>
     <script src="${ctxStatic}/jquery-validation/1.11.1/additional-methods.js" type="text/javascript"></script>
     <script language="javascript" type="text/javascript">
         $(document).ready(function() {
@@ -15,6 +15,13 @@
                 debug: true,
                 success: "valid"
             });
+
+            // 手机号码验证
+            jQuery.validator.addMethod("isMobile", function(value, element) {
+                var length = value.length;
+                var mobile = /^(13[0-9]{9})|(18[0-9]{9})|(14[0-9]{9})|(17[0-9]{9})|(15[0-9]{9})$/;
+                return this.optional(element) || (length == 11 && mobile.test(value));
+            }, "请正确填写您的手机号码");
 
             $( "#RegForm" ).validate({
                 rules: {
@@ -74,13 +81,39 @@
                     cache: false,
                     data:'phone=' + $("#phone").val(),
                     success: function(response){
-                        alert(response);
                         var obj = JSON.parse(response);
+                        if(obj.success==false){
+                            alert(obj.msg);
+                        }
                     },
                     error: function(){
-                        alert('请求出错..');
+                        alert('请求服务器出错..');
                     }
                 });
+        }
+
+        function showRequest(formData,jqForm,options){
+            return $("#RegForm").valid();
+        }
+
+        function submit(){
+            $('#RegForm').ajaxSubmit({
+                type:"post",
+                url:"${ctx}/register/register",
+                data:"'phone'='" + $("#phone").val()+"','vcode'='"+ $("#vcode").val()+"','password'='"+$("#password").val()+"'",
+                beforeSubmit:showRequest,
+                success: function(response){
+                    //alert(response);
+                    var obj = JSON.parse(response);
+                    if(obj.success==false){
+                        alert(obj.msg);
+                    }
+                },
+                error: function(){
+                    alert('请求出错..');
+                }
+            });
+            return false; //此处必须返回false，阻止常规的form提交
         }
 
 
@@ -108,12 +141,8 @@
             }
         };
 
-        // 手机号码验证
-        jQuery.validator.addMethod("isMobile", function(value, element) {
-            var length = value.length;
-            var mobile = /^(13[0-9]{9})|(18[0-9]{9})|(14[0-9]{9})|(17[0-9]{9})|(15[0-9]{9})$/;
-            return this.optional(element) || (length == 11 && mobile.test(value));
-        }, "请正确填写您的手机号码");
+
+
 
     </script>
 </head>
@@ -125,20 +154,18 @@
             <div class="span5"><h3 class="strong highlight">免费注册新账户</h3>
 
 
-                <form name="RegForm" method="post" id="RegForm" action="${ctx}/register"
+                <form name="RegForm" method="post" onsubmit="submit()" id="RegForm" action="${ctx}/register/register"
                        class="form-horizontal">
 
-                    <div class="row">
                     <div class="control-group"><input for="phone" id="phone" name="phone" class="text-large span4"
                                                       placeholder="手机号码"
-                                                       <%--class="text-large span4"--%>
+                                                       class="text-large span4"
                                                       <%--data-com.agilebits.onepassword.user-edited="yes"--%>
                                                       type="text"></div>
-                    </div>
 
                     <div class="control-group">
                         <input autocomplete="off"  class="btn btn-action btn-large btn-block" onclick="shortMessagraxc()"
-                               type="button"  value="获取短信验证码" id="vcode_btn" name="vcode_btn" class="axc_yzm02 fr"/>
+                               type="button"  value="获取短信验证码" id="vcode_btn" class="axc_yzm02 fr"/>
                     </div>
 
                     <div class="control-group">
@@ -161,7 +188,7 @@
                                                       type="password"></div>
                     <div class="row">
                         <div class="span4">
-                            <button class="btn btn-action btn-large btn-block" type="submit" id="signup">注册</button>
+                            <button class="btn btn-action btn-large btn-block"  class="submit" type="submit">注册</button>
                             <br>
                             <span>已经注册过账户？</span><span>&nbsp;<a href="${ctx}/login">现在登录</a></span></div>
                     </div>

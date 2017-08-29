@@ -9,7 +9,7 @@ import org.activiti.engine.impl.persistence.entity.GroupIdentityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Activiti Group Entity Factory
+ * Activiti Group KdniaoTrackQueryAPIEntity Factory
  * @author ThinkGem
  * @version 2013-11-03
  */

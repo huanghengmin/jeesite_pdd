@@ -22,7 +22,7 @@ import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.service.SystemService;
 
 /**
- * Activiti Group Entity Service
+ * Activiti Group KdniaoTrackQueryAPIEntity Service
  * @author ThinkGem
  * @version 2013-12-05
  */
