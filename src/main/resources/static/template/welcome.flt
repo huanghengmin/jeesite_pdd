@@ -1,11 +1,11 @@
 <!DOCTYPE html>  
 <html>  
 <body>  
-<h4>亲爱的科帮网用户，你好！</h4>  
+<h4>亲爱的用户，你好！</h4>
   
 <p style="color:blue;"> ${content}</p>  
   
-祝：开心！  
+多多防罚款！
   
 </body>  
 </html>  

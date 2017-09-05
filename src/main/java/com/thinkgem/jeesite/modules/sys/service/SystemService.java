@@ -8,14 +8,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import com.thinkgem.jeesite.modules.pdd.dao.PddEmailDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddExpressDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddPlatformDao;
-import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
-import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
-import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
-import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
+import com.thinkgem.jeesite.modules.pdd.dao.*;
+import com.thinkgem.jeesite.modules.pdd.entity.*;
+import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.identity.Group;
 import org.apache.shiro.session.Session;
@@ -86,7 +81,8 @@ public class SystemService extends BaseService implements InitializingBean {
 	private PddPhoneDao pddPhoneDao;
 
 	@Autowired
-	private PddPlatformDao pddPlatformDao;
+	private PddPlatformService pddPlatformService;
+
 
 	//-- User Service --//
 	
@@ -225,10 +221,10 @@ public class SystemService extends BaseService implements InitializingBean {
 	@Transactional(readOnly = false)
 	public void deleteUser(User user) {
 		userDao.delete(user);
-		pddEmailDao.delete(new PddEmail(user));
-		pddExpressDao.delete(new PddExpress(user));
-		pddPhoneDao.delete(new PddPhone(user));
-		pddPlatformDao.delete(new PddPlatform(user));
+		pddEmailDao.deleteByUser(new PddEmail(user));
+		pddExpressDao.deleteByUser(new PddExpress(user));
+		pddPhoneDao.deleteByUser(new PddPhone(user));
+		pddPlatformService.deleteByUser(new PddPlatform(user)); //删除用户所有数据
 
 		// 同步到Activiti
 		deleteActivitiUser(user);

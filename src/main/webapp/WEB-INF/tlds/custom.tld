@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib>
+  <tlib-version>1.1.2</tlib-version>
+  <jsp-version>1.2</jsp-version>
+    <short-name>Example TLD with Time Diff</short-name>
+    <tag>
+      <name>Time</name>
+      <tag-class>com.thinkgem.jeesite.modules.pdd.tag.TimeTag</tag-class>
+      <body-content>empty</body-content>
+
+      <attribute>
+        <name>type</name>
+        <required>true</required>
+        <type>java.lang.String</type>
+      </attribute>
+      <attribute>
+        <name>diff</name>
+        <required>false</required>
+        <type>java.lang.Long</type>
+        <rtexprvalue>true</rtexprvalue>
+      </attribute>
+      <attribute>
+        <name>startDate</name>
+        <required>false</required>
+        <type>java.util.Date</type>
+        <rtexprvalue>true</rtexprvalue>
+      </attribute>
+      <attribute>
+        <name>endDate</name>
+        <required>false</required>
+        <type>java.util.Date</type>
+        <rtexprvalue>true</rtexprvalue>
+      </attribute>
+    </tag>
+  </taglib>

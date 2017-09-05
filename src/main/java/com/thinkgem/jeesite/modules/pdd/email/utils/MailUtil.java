@@ -19,20 +19,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MailUtil {
     private Logger logger = LoggerFactory.getLogger(MailUtil.class);
 
-    private ScheduledExecutorService service = Executors.newScheduledThreadPool(6);
+    private ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
 
-    private final AtomicInteger count = new AtomicInteger(1);
+//    private final AtomicInteger count = new AtomicInteger(1);
 
     public void start(final JavaMailSender mailSender, final SimpleMailMessage message) {
         service.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if (count.get() == 2) {
+                   /* if (count.get() == 2) {
                         service.shutdown();
                         logger.info("the task is down");
                     }
-                    logger.info("start send email and the index is " + count);
+                    logger.info("start send email and the index is " + count);*/
                     mailSender.send(message);
                     logger.info("send email success");
                 }catch (Exception e){
@@ -47,11 +47,11 @@ public class MailUtil {
             @Override
             public void run() {
                 try {
-                    if (count.get() == 2) {
+                   /* if (count.get() == 2) {
                         service.shutdown();
                         logger.info("the task is down");
                     }
-                    logger.info("start send email and the index is " + count);
+                    logger.info("start send email and the index is " + count);*/
                     mailSender.send(message);
                     logger.info("send email success");
                 }catch (Exception e){

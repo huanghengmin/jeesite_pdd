@@ -7,14 +7,8 @@ import java.util.List;
 
 //import com.thinkgem.jeesite.modules.pdd.dao.PddOrderDao;
 //import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
-import com.thinkgem.jeesite.modules.pdd.dao.PddEmailDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddExpressDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
-import com.thinkgem.jeesite.modules.pdd.dao.PddPlatformDao;
-import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
-import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
-import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
-import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
+import com.thinkgem.jeesite.modules.pdd.dao.*;
+import com.thinkgem.jeesite.modules.pdd.entity.*;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.session.InvalidSessionException;
@@ -51,13 +45,26 @@ public class UserUtils {
 	private static PddExpressDao pddExpressDao = SpringContextHolder.getBean(PddExpressDao.class);
 	private static PddPhoneDao pddPhoneDao = SpringContextHolder.getBean(PddPhoneDao.class);
 	private static PddPlatformDao pddPlatformDao = SpringContextHolder.getBean(PddPlatformDao.class);
+	private static PddOrderDao pddOrderDao = SpringContextHolder.getBean(PddOrderDao.class);
+	private static PddLogisticsDao pddLogisticsDao = SpringContextHolder.getBean(PddLogisticsDao.class);
 	private static OfficeDao officeDao = SpringContextHolder.getBean(OfficeDao.class);
 
 	public static final String USER_CACHE = "userCache";
 	public static final String USER_CACHE_ID_ = "id_";
 	public static final String USER_CACHE_LOGIN_NAME_ = "ln";
 	public static final String USER_CACHE_LIST_BY_OFFICE_ID_ = "oid_";
-	
+
+
+	public static final String PLATFORM_CACHE = "platformCache";
+	public static final String PLATFORM_CACHE_ID_ = "id_";
+
+	public static final String ORDER_CACHE = "orderCache";
+	public static final String ORDER_CACHE_ID_ = "id_";
+
+	public static final String LOGISTICS_CACHE = "logisticsCache";
+	public static final String LOGISTICS_CACHE_ID_ = "id_";
+	public static final String LOGISTICS_CACHE_LOGISTICSID_ = "id_";
+
 	public static final String CACHE_AUTH_INFO = "authInfo";
 	public static final String CACHE_ROLE_LIST = "roleList";
 	public static final String CACHE_MENU_LIST = "menuList";
@@ -87,6 +94,63 @@ public class UserUtils {
 			CacheUtils.put(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getLoginName(), user);
 		}
 		return user;
+	}
+
+	/**
+	 * 根据ID获取用户
+	 * @param id
+	 * @return 取不到返回null
+	 */
+	public static PddPlatform getPlatform(String id){
+		PddPlatform pddPlatform = (PddPlatform)CacheUtils.get(PLATFORM_CACHE, PLATFORM_CACHE_ID_ + id);
+		if (pddPlatform ==  null){
+			pddPlatform = pddPlatformDao.get(id);
+			if (pddPlatform == null){
+				return null;
+			}
+			pddPlatform.setPddOrderList(pddOrderDao.findList(new PddOrder(pddPlatform)));
+			CacheUtils.put(PLATFORM_CACHE, PLATFORM_CACHE_ID_ + pddPlatform.getId(), pddPlatform);
+		}
+		return pddPlatform;
+	}
+
+	public static PddLogistics getLogistics(String id){
+		PddLogistics pddLogistics = (PddLogistics)CacheUtils.get(LOGISTICS_CACHE, LOGISTICS_CACHE_ID_ + id);
+		if (pddLogistics ==  null){
+			pddLogistics = pddLogisticsDao.get(id);
+			if (pddLogistics == null){
+				return null;
+			}
+			CacheUtils.put(LOGISTICS_CACHE, LOGISTICS_CACHE_LOGISTICSID_ + pddLogistics.getLogisticsId(), pddLogistics);
+			CacheUtils.put(LOGISTICS_CACHE, LOGISTICS_CACHE_ID_ + pddLogistics.getId(), pddLogistics);
+		}
+		return pddLogistics;
+	}
+
+	public static PddLogistics getLogisticsId(String id){
+		PddLogistics pddLogistics = (PddLogistics)CacheUtils.get(LOGISTICS_CACHE, LOGISTICS_CACHE_LOGISTICSID_ + id);
+		if (pddLogistics ==  null){
+			pddLogistics = pddLogisticsDao.findByLogisticsId(id);
+			if (pddLogistics == null){
+				return null;
+			}
+			CacheUtils.put(LOGISTICS_CACHE, LOGISTICS_CACHE_LOGISTICSID_ + pddLogistics.getLogisticsId(), pddLogistics);
+			CacheUtils.put(LOGISTICS_CACHE, LOGISTICS_CACHE_ID_ + pddLogistics.getId(), pddLogistics);
+		}
+		return pddLogistics;
+	}
+
+
+	public static PddOrder getPddOrder(String id){
+		PddOrder pddOrder = (PddOrder)CacheUtils.get(ORDER_CACHE, ORDER_CACHE_ID_ + id);
+		if (pddOrder ==  null){
+			pddOrder = pddOrderDao.get(id);
+			if (pddOrder == null){
+				return null;
+			}
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_ID_ + pddOrder.getId(), pddOrder);
+		}
+		return pddOrder;
 	}
 	
 	/**
@@ -138,7 +202,24 @@ public class UserUtils {
 			CacheUtils.remove(USER_CACHE, USER_CACHE_LIST_BY_OFFICE_ID_ + user.getOffice().getId());
 		}
 	}
-	
+
+
+	/**
+	 * 清除指定用户缓存
+	 * @param pddPlatform
+	 */
+	public static void clearPlatformCache(PddPlatform pddPlatform){
+		CacheUtils.remove(PLATFORM_CACHE, PLATFORM_CACHE_ID_ + pddPlatform.getId());
+	}
+
+	public static void clearLogisticsCache(PddLogistics pddLogistics){
+		CacheUtils.remove(LOGISTICS_CACHE, LOGISTICS_CACHE_LOGISTICSID_ + pddLogistics.getLogisticsId());
+		CacheUtils.remove(LOGISTICS_CACHE, LOGISTICS_CACHE_ID_ + pddLogistics.getId());
+	}
+
+	public static void clearOrderCache(PddOrder pddOrder){
+		CacheUtils.remove(ORDER_CACHE, ORDER_CACHE_ID_ + pddOrder.getId());
+	}
 	/**
 	 * 获取当前用户
 	 * @return 取不到返回 new User()

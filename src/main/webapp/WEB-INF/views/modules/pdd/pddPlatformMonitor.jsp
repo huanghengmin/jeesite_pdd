@@ -23,11 +23,11 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $.ajax({
-                url:'${ctx}/pdd/pddPlatform/report?id=${pddPlatform.id}',
+                url: '${ctx}/pdd/pddPlatform/report',
                 type: "post",
-                contentType : 'application/json;charset=utf-8',
+                contentType: 'application/json;charset=utf-8',
                 cache: false,
-                success: function(data){
+                success: function (data) {
                     var allCount = data.allCount;
                     var count_0 = data.count_0;
                     var count_1 = data.count_1;
@@ -73,7 +73,7 @@
                         arr.push([seriesItem.name, seriesItem.number]);
                     });
 
-                     options_pie = {
+                    options_pie = {
                         chart: {
                             plotBackgroundColor: null,
                             plotBorderWidth: null,
@@ -84,7 +84,7 @@
                         tooltip: {
                             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
                         },
-                         credits: { enabled: false},
+                        credits: {enabled: false},
                         plotOptions: {
                             pie: {
                                 allowPointSelect: true,
@@ -101,7 +101,7 @@
                         series: [{
                             type: 'pie',
                             name: pie_title,
-                            data:arr
+                            data: arr
                         }]
                     }
 
@@ -112,7 +112,7 @@
                         title: {
                             text: dataBean_title
                         },
-                        credits: { enabled: false},
+                        credits: {enabled: false},
                         xAxis: {
                             categories: dataBean_categories,
                             title: {
@@ -155,18 +155,18 @@
                         options_chart.series[i] = series;
                     });
 
-                     options_line_chart = {
+                    options_line_chart = {
                         chart: {
                             type: 'line'
                         },
                         title: {
                             text: DataBeanLine_title
                         },
-                         credits: { enabled: false},
+                        credits: {enabled: false},
                         xAxis: {
-                             title: {
-                                 text: DataBeanLine_xAxisTitle
-                             },
+                            title: {
+                                text: DataBeanLine_xAxisTitle
+                            },
                             categories: DataBeanLine_categories
                         },
                         yAxis: {
@@ -211,7 +211,7 @@
                     new Highcharts.Chart(DataBeanLine_divId, options_line_chart);
 
                 },
-                error: function(){
+                error: function () {
                     alert('请求服务器出错......');
                 }
             });
@@ -222,43 +222,43 @@
 <div id="wrap">
     <!-- NAVBAR -->
     <!-- CONTAINER -->
-
     <div class="divcss5">
         <h3 class="panel-title">
             <span >总订单:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?id=${pddPlatform.id}">
-                <div id="allCount" class="div-inline"></div>
+            <a href="${ctx}/pdd/pddOrder/list">
+            <div id="allCount" class="div-inline"></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
 
             <span >待揽收:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=0&id=${pddPlatform.id}">
-                <div id="count_0" class="div-inline" ></div>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=0">
+            <div id="count_0" class="div-inline" ></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
 
             <span >待中转:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=1&id=${pddPlatform.id}">
-                <div id="count_1" class="div-inline" ></div>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=1">
+            <div id="count_1" class="div-inline" ></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
 
             <span >运输途中:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=2&id=${pddPlatform.id}">
-                <div id="count_2" class="div-inline" ></div>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=2">
+            <div id="count_2" class="div-inline" ></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
 
+
             <span >已签收:(</span>
             <span ></span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=3&id=${pddPlatform.id}">
-                <div id="count_3" class="div-inline" ></div>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=3">
+            <div id="count_3" class="div-inline" ></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
 
             <span >到达待取:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=201&id=${pddPlatform.id}">
-                <div id="count_201" class="div-inline" ></div>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=201">
+            <div id="count_201" class="div-inline" ></div>
             </a>
             <span >)&nbsp;&nbsp;</span>
         </h3>
@@ -267,21 +267,21 @@
     <div class="divcss5">
         <h2 class="panel-title">
             <div class="div-inline">
-                <span style="color:red" >揽件预警订单:(</span>
-                <a href="${ctx}/pdd/pddOrder/list?packageStatus=5&id=${pddPlatform.id}">
-                    <div id="count_5" class="div-inline"></div>
-                </a>
-                <span style="color:red">)&nbsp;&nbsp;</span>
+            <span style="color:red" >揽件预警订单:(</span>
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=5">
+                <div id="count_5" class="div-inline"></div>
+            </a>
+            <span style="color:red">)&nbsp;&nbsp;</span>
             </div>
 
             <span style="color:red" >二次揽件预警订单:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=6&id=${pddPlatform.id}">
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=6">
                 <div id="count_6" class="div-inline"></div>
             </a>
             <span style="color:red">)&nbsp;&nbsp;</span>
 
             <span style="color:red" >问题件:(</span>
-            <a href="${ctx}/pdd/pddOrder/list?packageStatus=4&id=${pddPlatform.id}">
+            <a href="${ctx}/pdd/pddOrder/list?packageStatus=4">
                 <div id="count_4" class="div-inline"></div>
             </a>
             <span style="color:red">)</span>
@@ -289,6 +289,7 @@
     </div>
 
     <div class="container">
+
         <div class="row">
             <div class="col-md-12">
                 <div class="row">

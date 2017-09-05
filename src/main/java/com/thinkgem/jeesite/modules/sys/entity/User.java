@@ -59,6 +59,11 @@ public class User extends DataEntity<User> {
 	private Integer orderCycle;		//订单同步周期
 	private Integer phoneRemand;		// 短信提醒
 	private Integer emailRemand;		// 邮箱提醒
+	private Integer platformNumber;
+	private Integer noteNumber;
+	private boolean enablePullRemand; //启用揽件提醒
+	private boolean enableSecondRemand;//启用二次揽件提醒
+	private boolean enableOrderCycle; //启用订单同步
 	
 	private Role role;	// 根据角色查询用户条件
 	
@@ -406,5 +411,45 @@ public class User extends DataEntity<User> {
 
 	public void setEmailRemand(Integer emailRemand) {
 		this.emailRemand = emailRemand;
+	}
+
+	public Integer getPlatformNumber() {
+		return platformNumber;
+	}
+
+	public void setPlatformNumber(Integer platformNumber) {
+		this.platformNumber = platformNumber;
+	}
+
+	public Integer getNoteNumber() {
+		return noteNumber;
+	}
+
+	public void setNoteNumber(Integer noteNumber) {
+		this.noteNumber = noteNumber;
+	}
+
+	public boolean isEnablePullRemand() {
+		return enablePullRemand;
+	}
+
+	public void setEnablePullRemand(boolean enablePullRemand) {
+		this.enablePullRemand = enablePullRemand;
+	}
+
+	public boolean isEnableSecondRemand() {
+		return enableSecondRemand;
+	}
+
+	public void setEnableSecondRemand(boolean enableSecondRemand) {
+		this.enableSecondRemand = enableSecondRemand;
+	}
+
+	public boolean isEnableOrderCycle() {
+		return enableOrderCycle;
+	}
+
+	public void setEnableOrderCycle(boolean enableOrderCycle) {
+		this.enableOrderCycle = enableOrderCycle;
 	}
 }

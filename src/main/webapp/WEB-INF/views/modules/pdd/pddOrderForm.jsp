@@ -79,6 +79,16 @@
 				</form:select>
 			</div>
 		</div>
+
+		<div class="control-group">
+			<label class="control-label">快递公司：</label>
+			<div class="controls">
+				<form:select path="pddLogistics.logisticsId" htmlEscape="false" class="input-mini">
+					<form:option value="" label="请选择" htmlEscape="false" />
+					<form:options items="${pddLogisticses}" itemLabel="logisticsCompany" itemValue="logisticsId" htmlEscape="false" />
+				</form:select>
+			</div>
+		</div>
 		<div class="control-group">
 			<label class="control-label">最后更新时间：</label>
 			<div class="controls">

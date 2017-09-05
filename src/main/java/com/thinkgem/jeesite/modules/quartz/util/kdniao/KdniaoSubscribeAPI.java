@@ -2,6 +2,7 @@ package com.thinkgem.jeesite.modules.quartz.util.kdniao;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.RequestData;
+import com.thinkgem.jeesite.modules.quartz.util.pdd.HttpClientUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class KdniaoSubscribeAPI {
 
         String requestData = JSONObject.toJSONString(requestData1);
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("RequestData", urlEncoder(requestData, "UTF-8"));
         params.put("EBusinessID", eBusinessID);
         params.put("RequestType", "1008");
@@ -98,7 +99,7 @@ public class KdniaoSubscribeAPI {
         params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
         params.put("DataType", "2");
 
-        String result=sendPost(reqURL, params);
+        String result= HttpClientUtil.httpPostRequest(reqURL, params);
 
 
         /*{

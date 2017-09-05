@@ -101,6 +101,9 @@ public class UserController extends BaseController {
 		currentUser.setSecondRemand(user.getSecondRemand());
 		currentUser.setPhoneRemand(user.getPhoneRemand());
 		currentUser.setOrderCycle(user.getOrderCycle());
+		currentUser.setEnablePullRemand(user.isEnablePullRemand());
+		currentUser.setEnableSecondRemand(user.isEnableSecondRemand());
+		currentUser.setEnableOrderCycle(user.isEnableOrderCycle());
 		systemService.updateUserSet(currentUser);
 		model.addAttribute("message", "保存用户设置成功");
 		model.addAttribute("user", currentUser);

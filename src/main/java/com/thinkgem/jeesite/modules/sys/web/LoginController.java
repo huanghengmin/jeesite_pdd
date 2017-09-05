@@ -128,7 +128,7 @@ public class LoginController extends BaseController{
 				user.setLoginFlag("1");//可登陆
 				user.setDelFlag("0"); //未删除
 				//check vcode
-				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()<1000*60*3){//已过1分钟，需要重新发送
+				if(new Date().getTime()-pddVcode.getUpdateTime().getTime()<1000*60*10){//已过10分钟，需要重新发送
 					// 如果新密码为空，则不更换密码
 					if (StringUtils.isNotBlank(user.getNewPassword())) {
 						user.setPassword(SystemService.entryptPassword(user.getNewPassword()));
@@ -163,7 +163,7 @@ public class LoginController extends BaseController{
 					addMessage(model, "注册用户'" + user.getLoginName() + "'成功");
 					return "modules/sys/sysRegister";
 				}else {
-					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过3分钟，已失效，请重新获取");
+					addMessage(model, "注册用户'" + user.getLoginName() + "'失败，验证码已过10分钟，已失效，请重新获取");
 					return "modules/sys/sysRegister";
 				}
 			}
@@ -191,13 +191,14 @@ public class LoginController extends BaseController{
 			if (u != null){
 				if(u.getLoginFlag().equals("1")){
 					addMessage(model, "用户'" + user.getLoginName() + "'已激活，请登陆");
-					return "modules/sys/sysRegister";
+					return "modules/sys/sysLogin";
 				}else {
 					Email mail = new Email();
 					mail.setEmail(new String[]{email});
 					mail.setSubject("激活邮件");
 					mail.setContent("<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1><h3>" +
-							"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+//							"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+							"<a href=\"http://123.207.58.71:8080/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
 							"点击激活</a></h3>");
 //					mail.setTemplate("welcome");
 
@@ -208,7 +209,7 @@ public class LoginController extends BaseController{
 					}
 					systemService.saveUser(u);
 					addMessage(model, "已发送激活链接到邮箱"+user.getLoginName()+"，请激活后登陆");
-					return "modules/sys/sysRegister";
+					return "modules/sys/sysEmailRegister";
 				}
 			}else {
 				user.setName(email);
@@ -256,7 +257,8 @@ public class LoginController extends BaseController{
 				mail.setEmail(new String[]{email});
 				mail.setSubject("激活邮件");
 				mail.setContent("<h1>此邮件为官方激活邮件！请点击下面链接完成激活操作！</h1><h3>" +
-						"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+//						"<a href=\"http://localhost:8181/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
+						"<a href=\"http://123.207.58.71:8080/jeesite/a/register/emailRegisterCode?email=" + email + "\">" +
 						"点击激活</a></h3>");
 //					mail.setTemplate("welcome");
 
@@ -286,14 +288,14 @@ public class LoginController extends BaseController{
 		String email = request.getParameter("email");
 		User u = systemService.getUserByLoginName(email);
 		if(u!=null){
-			if(new Date().getTime()-u.getUpdateDate().getTime()<3*60*1000) {
+			if(new Date().getTime()-u.getUpdateDate().getTime()<10*60*1000) {
 				u.setLoginFlag("1");
 				systemService.saveUser(u);
 				addMessage(model, "激活用户成功：请登陆");
 				return "modules/sys/sysLogin";
 			}else {
-				addMessage(model, "激活失败：激活码链接未激活已超过3分钟，激活无效！");
-				return "modules/sys/sysLogin";
+				addMessage(model, "激活失败：激活码链接未激活已超过10分钟，激活无效！");
+				return "modules/sys/sysEmailRegister";
 			}
 		}
 		addMessage(model, "激活用户失败：验证码不匹配");
@@ -309,7 +311,6 @@ public class LoginController extends BaseController{
 	public String index(HttpServletRequest request, HttpServletResponse response, Model model) {
 		return "modules/sys/sysRegister";
 	}
-
 
 	@ResponseBody
 	@RequestMapping(value = "${adminPath}/register/vcode")
@@ -328,6 +329,7 @@ public class LoginController extends BaseController{
 				}
 			}else {
 				User user = new User();
+				user.setId(IdGen.uuid());
 				pddVcode = new PddVcode();
 				pddVcode.setPhone(phone);
 				pddVcode.setVcode(String.valueOf(code));

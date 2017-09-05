@@ -40,13 +40,18 @@
             <map>
                 <entry key="cas" value-ref="casFilter"/>
                 <entry key="authc" value-ref="formAuthenticationFilter"/>
+                <entry key="logout" value-ref="logoutFilter" />
             </map>
         </property>
 		<property name="filterChainDefinitions">
 			<ref bean="shiroFilterChainDefinitions"/>
 		</property>
 	</bean>
-	
+
+	<bean id="logoutFilter" class="org.apache.shiro.web.filter.authc.LogoutFilter">
+		<property name="redirectUrl" value="${adminPath}/login" />
+	</bean>
+
 	<!-- CAS认证过滤器 -->  
 	<bean id="casFilter" class="org.apache.shiro.cas.CasFilter">  
 		<property name="failureUrl" value="${adminPath}/login"/>

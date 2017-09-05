@@ -5,6 +5,7 @@ package com.thinkgem.jeesite.modules.pdd.service;
 
 import java.util.List;
 
+import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import com.thinkgem.jeesite.common.persistence.Page;
 import com.thinkgem.jeesite.common.service.CrudService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
 import com.thinkgem.jeesite.modules.pdd.dao.PddOrderDao;
+
 
 /**
  * 订单管理Service
@@ -28,7 +30,7 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 
 
 	public PddOrder get(String id) {
-		return super.get(id);
+		return UserUtils.getPddOrder(id);
 	}
 	
 	public List<PddOrder> findList(PddOrder pddOrder) {
@@ -42,11 +44,15 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	@Transactional(readOnly = false)
 	public void save(PddOrder pddOrder) {
 		super.save(pddOrder);
+		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
+		UserUtils.clearOrderCache(pddOrder);
 	}
 	
 	@Transactional(readOnly = false)
 	public void delete(PddOrder pddOrder) {
 		super.delete(pddOrder);
+		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
+		UserUtils.clearOrderCache(pddOrder);
 	}
 
     public Page<PddOrder> findPageByUser(Page<PddOrder> pddOrderPage, PddOrder pddOrder) {
@@ -54,15 +60,17 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 		pddOrderPage.setList(pddOrderDao.findListByUser(pddOrder));
 		return pddOrderPage;
     }
-
 	/**
 	 * 更新数据
-	 * @param entity
+	 * @param pddOrder
 	 * @return
 	 */
 	@Transactional(readOnly = false)
-	public int updateByOrderSn(PddOrder entity){
-		return pddOrderDao.updateByOrderSn(entity);
+	public int updateByOrderSn(PddOrder pddOrder){
+		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
+		UserUtils.clearOrderCache(pddOrder);
+		return pddOrderDao.updateByOrderSn(pddOrder);
+
 	};
 
 	/**
@@ -80,11 +88,17 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	}
 
 	@Transactional(readOnly = false)
-	public PddOrder updateByLogisticCode(PddOrder entity){
-		return pddOrderDao.updateByLogisticCode(entity);
+	public PddOrder updateByLogisticCode(PddOrder pddOrder){
+		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
+		UserUtils.clearOrderCache(pddOrder);
+		return pddOrderDao.updateByLogisticCode(pddOrder);
 	}
 
 	public long findCount(PddOrder entity){
 		return pddOrderDao.findCount(entity);
+	}
+
+	public List<PddOrder> findListByNotSignInStatus(PddOrder pddOrder){
+		return pddOrderDao.findListByNotSignInStatus(pddOrder);
 	}
 }

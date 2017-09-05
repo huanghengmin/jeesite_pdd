@@ -81,10 +81,15 @@
 		a.update_date,
 		a.del_flag,
 		a.pull_remand AS "pullRemand",
+		a.enable_pull_remand AS "enablePullRemand",
 		a.second_Remand AS "secondRemand",
+		a.enable_second_Remand AS "enableSecondRemand",
 		a.order_cycle AS "orderCycle",
+		a.enable_order_cycle AS "enableOrderCycle",
 		a.phone_remand AS "phoneRemand",
 		a.email_remand AS "emailRemand",
+		a.platform_number AS "platformNumber",
+		a.note_number AS "noteNumber",
     	c.name AS "company.name",
     	c.parent_id AS "company.parent.id",
     	c.parent_ids AS "company.parentIds",
@@ -327,9 +332,14 @@
 	<update id="updateUserSet">
 		UPDATE sys_user SET
 			pull_remand = #{pullRemand},
+			enable_pull_remand = #{enablePullRemand},
 			second_Remand = #{secondRemand},
+			enable_second_Remand = #{enableSecondRemand},
 			order_cycle = #{orderCycle},
+			enable_order_cycle = #{enableOrderCycle},
 			phone_remand = #{phoneRemand},
+			platform_number = #{platformNumber},
+			note_number = #{noteNumber},
 			email_remand = #{emailRemand}
 		WHERE id = #{id}
 	</update>

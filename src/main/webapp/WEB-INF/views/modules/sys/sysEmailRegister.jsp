@@ -17,6 +17,11 @@
             });
 
             $( "#RegForm" ).validate({
+                submitHandler : function(form) {  //验证通过后的执行方法
+                    //当前的form通过ajax方式提交（用到jQuery.Form文件）
+                    submit();
+
+                },
                 rules: {
                     password: "required",
                     password_again: {
@@ -49,7 +54,7 @@
         function submit(){
             $('#RegForm').ajaxSubmit({
                 type:"post",
-                url:"${ctx}/register/register",
+                url:"${ctx}/register/emailRegister",
                 data:"'email'='" + $("#email").val()+"','password'='"+$("#password").val()+"'",
                 beforeSubmit:showRequest,
                 success: function(response){

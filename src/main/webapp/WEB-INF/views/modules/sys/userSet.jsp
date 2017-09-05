@@ -25,8 +25,8 @@
 			});
 
             $( "#slider-range-pullRemand" ).slider({
-                min: 8,
-                max: 24,
+                min: 3,
+                max: 23,
                 slide: function( event, ui ) {
                     $( "#amount_pullRemand" ).val( ui.value );
                 }
@@ -39,8 +39,8 @@
 
 
             $( "#slider-range-shamRemand" ).slider({
-                min: 8,
-                max: 24,
+                min: 3,
+                max: 23,
                 slide: function( event, ui ) {
                     $( "#amount_shamRemand" ).val( ui.value );
                 }
@@ -49,8 +49,8 @@
             //$( "#amount_shamRemand" ).val( $( "#slider-range-shamRemand" ).slider( "value" ) );
 
             $( "#slider-range-orderCycle" ).slider({
-                min: 8,
-                max: 24,
+                min: 3,
+                max: 23,
                 slide: function( event, ui ) {
                     $( "#amount_orderCycle" ).val( ui.value );
                 }
@@ -68,34 +68,38 @@
 		<form:hidden path="id"/>
 		<sys:message content="${message}"/>
 		<div class="control-group">
+			<form:checkbox path="enablePullRemand" items="${fns:getDictList('status')}" itemLabel="label" itemValue="value" htmlEscape="false" class=""/>
 			<label class="control-label">揽件提醒：</label>
 			<div class="controls">
 				<p>
 					<label>离发货:</label>
 					<form:input type="text"  path="pullRemand" id="amount_pullRemand" readonly="true" style="border:0; color:#f6931f; font-weight:bold;"/>
-					<label>小时&lt;%&ndash;（注：快递公司揽件）&ndash;%&gt;</label>
+					<label>小时（注：快递公司揽件）</label>
 				</p>
 				<div class="input-xlarge"  id="slider-range-pullRemand" ></div>
 			</div>
 		</div>
 		<div class="control-group">
+			<form:checkbox path="enableSecondRemand" items="${fns:getDictList('status')}" itemLabel="label" itemValue="value" htmlEscape="false" class=""/>
 			<label class="control-label">二次揽件提醒：</label>
 			<div class="controls">
 					<p>
 						<label>离发货:</label>
 						<form:input type="text"   path="secondRemand" id="amount_shamRemand" readonly="true" style="border:0; color:#f6931f; font-weight:bold;"/>
-						<label>小时&lt;%&ndash;（注：物流无变化）&ndash;%&gt;</label>
+						<label>小时（注：物流无变化）</label>
 					</p>
 					<div class="input-xlarge" value  id="slider-range-shamRemand" ></div>
 			</div>
 		</div>
+
 		<div class="control-group">
+			<form:checkbox path="enableOrderCycle" items="${fns:getDictList('status')}" itemLabel="label" itemValue="value" htmlEscape="false" class=""/>
 			<label class="control-label">订单获取周期：</label>
 			<div class="controls">
 				<p>
 					<label>每:</label>
 					<form:input type="text" path="orderCycle" id="amount_orderCycle" readonly="true" style="border:0; color:#f6931f; font-weight:bold;"/>
-					<label>小时&lt;%&ndash;（注：指每多少小时同步一次订单）&ndash;%&gt;</label>
+					<label>小时（注：指每多少小时同步一次订单）</label>
 				</p>
 				<div class="input-xlarge"   id="slider-range-orderCycle" ></div>
 			</div>
@@ -110,6 +114,20 @@
 			<label class="control-label">邮箱提醒：</label>
 			<div class="controls">
 				<form:radiobuttons path="emailRemand" items="${fns:getDictList('status')}" itemLabel="label" itemValue="value" htmlEscape="false" class=""/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">短信数量：</label>
+			<div class="controls">
+				<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">平台数量：</label>
+			<div class="controls">
+				<form:input path="platformNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
 			</div>
 		</div>
 		<div class="form-actions">

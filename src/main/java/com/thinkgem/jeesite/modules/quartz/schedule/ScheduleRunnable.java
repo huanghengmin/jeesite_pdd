@@ -1,8 +1,7 @@
 package com.thinkgem.jeesite.modules.quartz.schedule;
 
 import com.thinkgem.jeesite.common.utils.SpringContextHolder;
-import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
-import com.thinkgem.jeesite.modules.sys.entity.User;
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -17,16 +16,15 @@ import java.lang.reflect.Method;
 public class ScheduleRunnable implements Runnable {
 	private Object target;
 	private Method method;
-	private PddPlatform pddPlatform;
-	private User user;
+	private String params;
 	
-	public ScheduleRunnable(String beanName, String methodName, PddPlatform pddPlatform,User user) throws NoSuchMethodException, SecurityException {
+	public ScheduleRunnable(String beanName, String methodName, String params) throws NoSuchMethodException, SecurityException {
 		this.target = SpringContextHolder.getBean(beanName);
-		this.pddPlatform = pddPlatform;
-		this.user = user;
-		
-		if(pddPlatform!=null&&user!=null){
-			this.method = target.getClass().getDeclaredMethod(methodName, PddPlatform.class ,User.class);
+		this.params = params;
+		if(StringUtils.isNotBlank(params)){
+			this.method = target.getClass().getDeclaredMethod(methodName, String.class);
+		}else{
+			this.method = target.getClass().getDeclaredMethod(methodName);
 		}
 	}
 
@@ -34,8 +32,10 @@ public class ScheduleRunnable implements Runnable {
 	public void run() {
 		try {
 			ReflectionUtils.makeAccessible(method);
-			if(pddPlatform!=null&&user!=null){
-				method.invoke(target, pddPlatform,user);
+			if(StringUtils.isNotBlank(params)){
+				method.invoke(target, params);
+			}else{
+				method.invoke(target);
 			}
 		}catch (Exception e) {
 			throw new RRException("执行定时任务失败", e);

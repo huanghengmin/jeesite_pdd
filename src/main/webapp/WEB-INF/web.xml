@@ -15,6 +15,9 @@
 		<listener-class>com.thinkgem.jeesite.modules.sys.listener.WebContextListener</listener-class>
 	</listener>
 	<listener>
+		<listener-class>com.thinkgem.jeesite.modules.quartz.schedule.QuartzListener</listener-class>
+	</listener>
+	<listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>  
 	</listener>
 	<filter>

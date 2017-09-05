@@ -154,7 +154,7 @@
             <div class="span5"><h3 class="strong highlight">免费注册新账户</h3>
 
 
-                <form name="RegForm" method="post" onsubmit="submit()" id="RegForm" action="${ctx}/register/register"
+                <form name="RegForm" method="post" onsubmit="submit()" id="RegForm"  action="${ctx}/register/register"
                        class="form-horizontal">
 
                     <div class="control-group"><input for="phone" id="phone" name="phone" class="text-large span4"
