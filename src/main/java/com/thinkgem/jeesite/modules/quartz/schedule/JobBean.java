@@ -1,6 +1,5 @@
 package com.thinkgem.jeesite.modules.quartz.schedule;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.utils.DateUtils;
@@ -12,7 +11,6 @@ import com.thinkgem.jeesite.modules.pdd.entity.PddLogistics;
 import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
-//import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdApiOrderDistinguish;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoSubscribeAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.*;
@@ -25,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,12 +51,12 @@ public class JobBean {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public void work(PddPlatform pddPlatform, List<PddOrder> pddOrders, User user, String start_updated_at, String end_updated_at, Date date) throws Exception {
+    public void work(PddPlatform pddPlatform, List<PddOrder> pddOrders, /*User user, */String start_updated_at, String end_updated_at, Date date) throws Exception {
         pddPlatform.setLastUpdate(new Date(Long.parseLong(end_updated_at) * 1000));
         String mall_id = pddPlatform.getMallId();
         String secret = pddPlatform.getSecret();
-        List<PddExpress> expresses = user.getPddExpressList();
-        if (expresses != null && expresses.size() > 0) {
+//        List<PddExpress> expresses = user.getPddExpressList();
+//        if (expresses != null && expresses.size() > 0) {
             String timestamp = String.valueOf(date.getTime() / 1000);
             int page = 1;
             String response = OrderGet.getOrderAdd(dataType, mall_id, secret, start_updated_at, end_updated_at, is_lucky_flag, refund_status, order_status,
@@ -81,7 +78,7 @@ public class JobBean {
                     if(myObj_second!=null) {
                         JSONObject object_second = myObj_second.getJSONObject("order_sn_increment_get_response");
                         if (object_second != null) {
-                            List<PddOrder> pddOrderList = parsePddOrder(object_second, expresses);
+                            List<PddOrder> pddOrderList = parsePddOrder(object_second/*, expresses*/);
                             if (pddOrderList != null && pddOrderList.size() > 0) {
                                 pddOrders.addAll(pddOrderList);
                             }
@@ -90,17 +87,17 @@ public class JobBean {
                 }
             }
             if (object != null) {
-                List<PddOrder> pddOrderList = parsePddOrder(object,expresses);
+                List<PddOrder> pddOrderList = parsePddOrder(object/*,expresses*/);
                 if(pddOrderList!=null&&pddOrderList.size()>0){
                     pddOrders.addAll(pddOrderList);
                 }
             }
-        } else {
-            logger.error("平台：" + pddPlatform.getShopName() + ",未配置快递鸟账号，请配置后同步！");
-        }
+//        } else {
+//            logger.error("平台：" + pddPlatform.getShopName() + ",未配置快递鸟账号，请配置后同步！");
+//        }
     }
 
-    public List<PddOrder> parsePddOrder(JSONObject object, List<PddExpress> expresses) {
+    public List<PddOrder> parsePddOrder(JSONObject object/*, List<PddExpress> expresses*/) {
         JSONArray array = object.getJSONArray("order_sn_list");
 //        logger.info("数据:" + array.toJSONString());
         if (array != null && array.size() > 0) {
@@ -155,52 +152,52 @@ public class JobBean {
 //				sb.append("商品图片:").append(so.getString("goods_img")).append("\n");
                 }
                 pddOrder.setGoodInfo(sb.toString());
-                if (pddOrder.getOrderStatus() != 3) {//未签收状态
-                    for (PddExpress e : expresses) {
-                        boolean isSync = false;
-                        KdniaoTrackQueryAPI kqapi = new KdniaoTrackQueryAPI(e.getEbusinessid(), e.getApikey());
-                        String ydata1 = null;
-                        try {
-                            ydata1 = kqapi.getOrderTracesByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
-                        } catch (Exception e1) {
-                            e1.printStackTrace();
-                        }
-                        if (StringUtils.isNotEmpty(ydata1)) {
-                            KdniaoTrackQueryAPIEntity kdniaoTrackQueryAPIEntity = JSON.parseObject(ydata1, KdniaoTrackQueryAPIEntity.class);
-                            if (kdniaoTrackQueryAPIEntity != null) {
-                                if (kdniaoTrackQueryAPIEntity.isSuccess()) {
-                                    int status = kdniaoTrackQueryAPIEntity.getState(); ////物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
-                                    if (status == 3) {
-                                        if (pddOrder.getOrderStatus() != 3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
-                                            pddOrder.setOrderStatus(3);
-                                        }
-                                    }
-                                    pddOrder.setPackageStatus(status);
-                                    List<Traces> traces = kdniaoTrackQueryAPIEntity.getTraces();
-                                    StringBuilder sb_2 = new StringBuilder();
-                                    for (Traces traces1 : traces) {
-                                        sb_2.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
-                                    }
-                                    pddOrder.setLogisticInfo(sb_2.toString());
-                                    pddOrder.setUpdatedAt(new Date()); //最后更新时间
-                                    isSync = true;
-                                    break;
-                                }
-                                if (isSync)
-                                    break;
-                            } else {
-                                pddOrder.setPackageStatus(0);//已签收设置为已签收
-                                pddOrder.setUpdatedAt(new Date()); //最后更新时间
-                            }
-                        } else {
-                            pddOrder.setPackageStatus(0);//已签收设置为已签收
-                            pddOrder.setUpdatedAt(new Date()); //最后更新时间
-                        }
-                    }
-                } else {
-                    pddOrder.setPackageStatus(3);//已签收设置为已签收
+//                if (pddOrder.getOrderStatus() != 3) {//未签收状态
+//                    for (PddExpress e : expresses) {
+//                        boolean isSync = false;
+//                        KdniaoTrackQueryAPI kqapi = new KdniaoTrackQueryAPI(e.getEbusinessid(), e.getApikey());
+//                        String ydata1 = null;
+//                        try {
+//                            ydata1 = kqapi.getOrderTracesByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
+//                        } catch (Exception e1) {
+//                            e1.printStackTrace();
+//                        }
+//                        if (StringUtils.isNotEmpty(ydata1)) {
+//                            KdniaoTrackQueryAPIEntity kdniaoTrackQueryAPIEntity = JSON.parseObject(ydata1, KdniaoTrackQueryAPIEntity.class);
+//                            if (kdniaoTrackQueryAPIEntity != null) {
+//                                if (kdniaoTrackQueryAPIEntity.isSuccess()) {
+//                                    int status = kdniaoTrackQueryAPIEntity.getState(); ////物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
+//                                    if (status == 3) {
+//                                        if (pddOrder.getOrderStatus() != 3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
+//                                            pddOrder.setOrderStatus(3);
+//                                        }
+//                                    }
+//                                    pddOrder.setPackageStatus(status);
+//                                    List<Traces> traces = kdniaoTrackQueryAPIEntity.getTraces();
+//                                    StringBuilder sb_2 = new StringBuilder();
+//                                    for (Traces traces1 : traces) {
+//                                        sb_2.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
+//                                    }
+//                                    pddOrder.setLogisticInfo(sb_2.toString());
+//                                    pddOrder.setUpdatedAt(new Date()); //最后更新时间
+//                                    isSync = true;
+//                                    break;
+//                                }
+//                                if (isSync)
+//                                    break;
+//                            } else {
+//                                pddOrder.setPackageStatus(0);//已签收设置为已签收
+//                                pddOrder.setUpdatedAt(new Date()); //最后更新时间
+//                            }
+//                        } else {
+//                            pddOrder.setPackageStatus(0);//已签收设置为已签收
+//                            pddOrder.setUpdatedAt(new Date()); //最后更新时间
+//                        }
+//                    }
+//                } else {
+                    pddOrder.setPackageStatus(pddOrder.getOrderStatus());//已签收设置为已签收
                     pddOrder.setUpdatedAt(new Date()); //最后更新时间
-                }
+//                }
                 pddOrders.add(pddOrder);
             }
             return pddOrders;
@@ -237,10 +234,10 @@ public class JobBean {
             User user = systemService.getUser(pddPlatform.getUser().getId());
             for (int i = 0; i < c; i++) {
                 //work
-                work(pddPlatform, pddOrders, user, String.valueOf(first_time / 1000), String.valueOf(second_time / 1000), date);
+                work(pddPlatform, pddOrders, /*user,*/ String.valueOf(first_time / 1000), String.valueOf(second_time / 1000), date);
                 second_time = second_time + second;
                 first_time = first_time + second;
-                Thread.sleep(100);
+//                Thread.sleep(100);
             }
             if (pddOrders != null && pddOrders.size() > 0) {
                 pddPlatformService.importOrder(pddOrders, pddPlatform, user);
@@ -268,10 +265,10 @@ public class JobBean {
             User user = systemService.getUser(pddPlatform.getUser().getId());
             for (int g = 0; g < count; g++) {
                 //work
-                work(pddPlatform, pddOrders, user, String.valueOf(first_time / 1000), String.valueOf(second_time / 1000), date);
+                work(pddPlatform, pddOrders, /*user,*/ String.valueOf(first_time / 1000), String.valueOf(second_time / 1000), date);
                 first_time = first_time + second;
                 second_time = second_time + second;
-                Thread.sleep(100);
+//                Thread.sleep(100);
             }
 
             if (pddOrders != null && pddOrders.size() > 0) {

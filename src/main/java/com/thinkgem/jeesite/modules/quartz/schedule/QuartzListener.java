@@ -43,7 +43,7 @@ public class QuartzListener implements ServletContextListener {
         scheduleJobEntity.setMethodName("job");
         scheduleJobEntity.setCreateDate(new Date());
         scheduleJobEntity.setStatus(Constant.ScheduleStatus.NORMAL.getValue());
-        scheduleJobEntity.setCronExpression("0 0/40 * * * ?");//40分钟执行一次
+        scheduleJobEntity.setCronExpression("0 0/30 * * * ?");//40分钟执行一次
         scheduleJobEntity.setId("1111111111111111");
         scheduleJobEntity.setRemarks("检测订单状态服务");
         scheduleJobEntity.setParams("自启动检测订单状态服务");

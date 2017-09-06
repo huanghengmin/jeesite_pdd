@@ -78,11 +78,11 @@ public class PddOrderController extends BaseController {
     @RequiresPermissions("pdd:pddOrder:view")
     @RequestMapping(value = {"list", ""})
     public String list(PddOrder pddOrder, HttpServletRequest request, HttpServletResponse response, Model model) {
-        if (pddOrder.getPddPlatform() != null) {
+        if (pddOrder.getPddPlatform() != null&&StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId())) {
             Page<PddOrder> page = pddOrderService.findPage(new Page<PddOrder>(request, response), pddOrder);
             model.addAttribute("page", page);
             model.addAttribute("user", UserUtils.getUser());
-            List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddOrder.getPddPlatform());
+            List<PddPlatform> pddPlatformList = pddPlatformService.findList(new PddPlatform(UserUtils.getUser()));
             model.addAttribute("pddPlatformList", pddPlatformList);
 
             List<PddLogistics> pddLogisticses = pddLogisticsDao.findList(new PddLogistics());
@@ -94,7 +94,7 @@ public class PddOrderController extends BaseController {
             Page<PddOrder> page = pddOrderService.findPageByUser(new Page<PddOrder>(request, response), pddOrder);
             model.addAttribute("page", page);
             model.addAttribute("user", UserUtils.getUser());
-            List<PddPlatform> pddPlatformList = pddPlatformService.findList(pddPlatform);
+            List<PddPlatform> pddPlatformList = pddPlatformService.findList(new PddPlatform(UserUtils.getUser()));
             model.addAttribute("pddPlatformList", pddPlatformList);
 
             List<PddLogistics> pddLogisticses = pddLogisticsDao.findList(new PddLogistics());

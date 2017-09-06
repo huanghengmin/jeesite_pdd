@@ -6,7 +6,15 @@
 	<meta name="decorator" content="default"/>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$("#no").focus();
+
+            // 字符验证
+            jQuery.validator.addMethod("userLoginName", function(value, element) {
+                return this.optional(element) || /^[\u0391-\uFFE5\w(@?)(\.?)]+$/.test(value);
+            }, "登录名只能包括中文字、英文字母、数字、下划线和@符号");
+
+
+
+            $("#no").focus();
 			$("#inputForm").validate({
 				rules: {
 					loginName: {remote: "${ctx}/sys/user/checkLoginName?oldLoginName=" + encodeURIComponent('${user.loginName}')}
@@ -79,7 +87,7 @@
 			<label class="control-label">登录名:</label>
 			<div class="controls">
 				<input id="oldLoginName" name="oldLoginName" type="hidden" value="${user.loginName}">
-				<form:input path="loginName" htmlEscape="false" maxlength="50" class="required userName"/>
+				<form:input path="loginName" htmlEscape="false" maxlength="50" class="required userLoginName"/>
 				<span class="help-inline"><font color="red">*</font> </span>
 			</div>
 		</div>

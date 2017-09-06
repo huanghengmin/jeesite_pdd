@@ -158,7 +158,6 @@ public class JobStartupBean {
     }
 
     public void job(String string) throws Exception {
-
         System.out.println("任务进行中。。。" + string);
         PddOrder pddOrder_status = new PddOrder();
         pddOrder_status.setPackageStatus(3);

@@ -94,8 +94,12 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 		return pddOrderDao.updateByLogisticCode(pddOrder);
 	}
 
-	public long findCount(PddOrder entity){
-		return pddOrderDao.findCount(entity);
+	public long findCountByUser(PddOrder entity){
+		return pddOrderDao.findCountByUser(entity);
+	}
+
+	public long findCountByPlatform(PddOrder entity){
+		return pddOrderDao.findCountByPlatform(entity);
 	}
 
 	public List<PddOrder> findListByNotSignInStatus(PddOrder pddOrder){
