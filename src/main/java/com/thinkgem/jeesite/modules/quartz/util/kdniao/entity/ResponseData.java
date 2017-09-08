@@ -43,4 +43,14 @@ public class ResponseData {
     public void setData(List<com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.Data> data) {
         Data = data;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseData{" +
+                "EBusinessID='" + EBusinessID + '\'' +
+                ", Count=" + Count +
+                ", PushTime='" + PushTime + '\'' +
+                ", Data=" + Data +
+                '}';
+    }
 }

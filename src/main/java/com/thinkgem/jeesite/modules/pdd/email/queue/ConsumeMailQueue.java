@@ -3,10 +3,14 @@ package com.thinkgem.jeesite.modules.pdd.email.queue;
 import com.alibaba.fastjson.JSON;
 import com.thinkgem.jeesite.common.utils.DateUtils;
 import com.thinkgem.jeesite.modules.pdd.email.model.Email;
+import com.thinkgem.jeesite.modules.pdd.email.model.Note;
 import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoSubscribeAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.Result;
+import com.thinkgem.jeesite.modules.quartz.util.sms.SMSLZUtils;
+import com.thinkgem.jeesite.modules.sys.entity.User;
+import com.thinkgem.jeesite.modules.sys.service.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,9 @@ public class ConsumeMailQueue {
     @Autowired
     IMailService mailService;
 
+    @Autowired
+    SystemService systemService;
+
 //    private static final String EBusinessID = "1301687";//hhm
 //    private static final String apiKey = "aece4f2c-bb84-4e5b-87a3-258f090dbae7"; //hhm
 
@@ -39,7 +46,7 @@ public class ConsumeMailQueue {
     public void startThread() {
         ExecutorService e = Executors.newFixedThreadPool(5);// 两个大小的固定线程池
         e.submit(new PollMail(mailService));
-        e.submit(new PollMail(mailService));
+        e.submit(new PullNote(systemService));
         e.submit(new PullOrder());
         e.submit(new PullOrder());
         e.submit(new PullOrder());
@@ -75,13 +82,42 @@ public class ConsumeMailQueue {
             while (true) {
                 try {
                     PddOrder pddOrder = OrderQueue.getOrderQueue().consume();
-                    KdniaoSubscribeAPI qapi = new KdniaoSubscribeAPI(EBusinessID, apiKey);
-                    String data1 = qapi.orderTracesSubByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
-                    Result result = JSON.parseObject(data1, Result.class);
-                    if (result.isSuccess()) {
-                        logger.info("注册推送：结果：" + result + ",快递编码：" + pddOrder.getPddLogistics().getLogisticsCode() + ",单号：" + pddOrder.getTrackingNumber() + "时间：" + DateUtils.formatDateTime(new Date()));
+                    if(pddOrder!=null) {
+                        KdniaoSubscribeAPI qapi = new KdniaoSubscribeAPI(EBusinessID, apiKey);
+                        String data1 = qapi.orderTracesSubByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
+                        Result result = JSON.parseObject(data1, Result.class);
+                        if (result.isSuccess()) {
+                            logger.info("注册推送：结果：" + result + ",快递编码：" + pddOrder.getPddLogistics().getLogisticsCode() + ",单号：" + pddOrder.getTrackingNumber() + "时间：" + DateUtils.formatDateTime(new Date()));
+                        }
                     }
                     Thread.sleep(1000 * 2);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    class PullNote implements Runnable {
+        SystemService systemService;
+
+        public PullNote(SystemService systemService) {
+            this.systemService = systemService;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Note note = NoteQueue.getNoteQueue().consume();
+                    if (note != null) {
+                        logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
+                        SMSLZUtils.sendSms(note.getPhones(), note.getSignName(),note.getTemplateCode(),note.getJson_params());
+                        User u = note.getUser();
+                        u.setNoteNumber(u.getNoteNumber() - 1);
+                        systemService.updateUserSet(u);
+                        Thread.sleep(1000 * 2);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

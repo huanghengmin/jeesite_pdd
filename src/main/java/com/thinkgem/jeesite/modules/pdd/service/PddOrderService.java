@@ -55,6 +55,12 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 		UserUtils.clearOrderCache(pddOrder);
 	}
 
+	@Transactional(readOnly = false)
+	public void deleteByMonth() {
+		pddOrderDao.deleteByMonth();
+		UserUtils.clearOrderCache();
+	}
+
     public Page<PddOrder> findPageByUser(Page<PddOrder> pddOrderPage, PddOrder pddOrder) {
 		pddOrder.setPage(pddOrderPage);
 		pddOrderPage.setList(pddOrderDao.findListByUser(pddOrder));
@@ -102,7 +108,11 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 		return pddOrderDao.findCountByPlatform(entity);
 	}
 
-	public List<PddOrder> findListByNotSignInStatus(PddOrder pddOrder){
-		return pddOrderDao.findListByNotSignInStatus(pddOrder);
+	public List<PddOrder> findListByNotSignInStatus(){
+		return pddOrderDao.findListByNotSignInStatus();
+	}
+
+	public List<PddOrder> findListByPlatformNotSignInStatus(PddOrder pddOrder){
+		return pddOrderDao.findListByPlatformNotSignInStatus(pddOrder);
 	}
 }

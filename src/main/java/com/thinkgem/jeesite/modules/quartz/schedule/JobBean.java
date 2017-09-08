@@ -1,5 +1,6 @@
 package com.thinkgem.jeesite.modules.quartz.schedule;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.thinkgem.jeesite.common.utils.DateUtils;
@@ -10,6 +11,7 @@ import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
 import com.thinkgem.jeesite.modules.pdd.entity.PddLogistics;
 import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
+import com.thinkgem.jeesite.modules.pdd.service.PddOrderService;
 import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoSubscribeAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
@@ -47,9 +49,67 @@ public class JobBean {
     @Autowired
     private PddPlatformService pddPlatformService;
     @Autowired
+    private PddOrderService pddOrderService;
+    @Autowired
     private SystemService systemService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    public void syncPackageStatus(String string) throws Exception {
+        PddPlatform pddPlatform = pddPlatformService.get(string);
+        if (pddPlatform != null) {
+            PddOrder pddOrder_find = new PddOrder(pddPlatform);
+            List<PddOrder> pddOrderList = pddOrderService.findListByPlatformNotSignInStatus(pddOrder_find);
+            for (PddOrder pddOrder : pddOrderList) {
+                User user = UserUtils.get(pddPlatform.getUser().getId());
+                //此时应该检测一下快递
+                List<PddExpress> pddExpresses = user.getPddExpressList();
+                if (pddExpresses != null && pddExpresses.size() > 0) {
+                    for (PddExpress pddExpres : pddExpresses) {//需要判断账号是否超过3000次，如超过换下一个几账号查询，没有时提示
+                        KdniaoTrackQueryAPI qapi = new KdniaoTrackQueryAPI(pddExpres.getEbusinessid(), pddExpres.getApikey());
+                        String data1 = qapi.getOrderTracesByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
+                        if (StringUtils.isNotEmpty(data1)) {
+                            KdniaoTrackQueryAPIEntity kdniaoTrackQueryAPIEntity = JSON.parseObject(data1, KdniaoTrackQueryAPIEntity.class);
+                            if (kdniaoTrackQueryAPIEntity != null) {
+                                if (kdniaoTrackQueryAPIEntity.isSuccess()) {
+                                    int status_query = kdniaoTrackQueryAPIEntity.getState();//物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
+                                    if (status_query == 3) {
+                                        if (pddOrder.getOrderStatus() != 3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
+                                            pddOrder.setOrderStatus(3);
+                                            pddOrder.setPackageStatus(status_query);
+                                            List<Traces> traces = kdniaoTrackQueryAPIEntity.getTraces();
+                                            StringBuilder sb = new StringBuilder();
+                                            for (Traces traces1 : traces) {
+                                                sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
+                                            }
+                                            pddOrder.setLogisticInfo(sb.toString());
+                                            pddOrder.setUpdatedAt(new Date()); //最后更新时间
+                                            pddOrderService.save(pddOrder);
+                                            break;
+                                        }
+                                    } else {//状态为运输中
+                                        List<Traces> traces = kdniaoTrackQueryAPIEntity.getTraces();
+                                        StringBuilder sb = new StringBuilder();
+                                        for (Traces traces1 : traces) {
+                                            sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
+                                        }
+
+                                        pddOrder.setPackageStatus(status_query);
+                                        pddOrder.setLogisticInfo(sb.toString());
+                                        pddOrder.setUpdatedAt(new Date()); //最后更新时间
+                                        pddOrderService.save(pddOrder);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Thread.sleep(100);
+        }
+
+    }
 
     public void work(PddPlatform pddPlatform, List<PddOrder> pddOrders, /*User user, */String start_updated_at, String end_updated_at, Date date) throws Exception {
         pddPlatform.setLastUpdate(new Date(Long.parseLong(end_updated_at) * 1000));
@@ -57,41 +117,41 @@ public class JobBean {
         String secret = pddPlatform.getSecret();
 //        List<PddExpress> expresses = user.getPddExpressList();
 //        if (expresses != null && expresses.size() > 0) {
-            String timestamp = String.valueOf(date.getTime() / 1000);
-            int page = 1;
-            String response = OrderGet.getOrderAdd(dataType, mall_id, secret, start_updated_at, end_updated_at, is_lucky_flag, refund_status, order_status,
-                    String.valueOf(page), String.valueOf(page_size), timestamp);
+        String timestamp = String.valueOf(date.getTime() / 1000);
+        int page = 1;
+        String response = OrderGet.getOrderAdd(dataType, mall_id, secret, start_updated_at, end_updated_at, is_lucky_flag, refund_status, order_status,
+                String.valueOf(page), String.valueOf(page_size), timestamp);
 
-            JSONObject myObj = JSONObject.parseObject(response);
+        JSONObject myObj = JSONObject.parseObject(response);
 //            logger.info("同步时间:开始" + DateUtils.formatDateTime(new Date(Long.parseLong(start_updated_at) * 1000)) + ",结束:" + DateUtils.formatDateTime(new Date(Long.parseLong(end_updated_at) * 1000)));
-            JSONObject object = myObj.getJSONObject("order_sn_increment_get_response");
-            logger.error("总量数量：******************************" + object.getInteger("total_count"));
+        JSONObject object = myObj.getJSONObject("order_sn_increment_get_response");
+        logger.error("总量数量：******************************" + object.getInteger("total_count"));
 
-            int totalRecord = object.getInteger("total_count");
+        int totalRecord = object.getInteger("total_count");
 
-            int totalPageNum = (totalRecord + page_size - 1) / page_size;
-            if (totalPageNum > 1) {
-                for (int i = 2; i <= totalPageNum; i++) {
-                    String response_second = OrderGet.getOrderAdd(dataType, mall_id, secret, start_updated_at, end_updated_at, is_lucky_flag, refund_status, order_status,
-                            String.valueOf(i), String.valueOf(page_size), timestamp);
-                    JSONObject myObj_second = JSONObject.parseObject(response_second);
-                    if(myObj_second!=null) {
-                        JSONObject object_second = myObj_second.getJSONObject("order_sn_increment_get_response");
-                        if (object_second != null) {
-                            List<PddOrder> pddOrderList = parsePddOrder(object_second/*, expresses*/);
-                            if (pddOrderList != null && pddOrderList.size() > 0) {
-                                pddOrders.addAll(pddOrderList);
-                            }
+        int totalPageNum = (totalRecord + page_size - 1) / page_size;
+        if (totalPageNum > 1) {
+            for (int i = 2; i <= totalPageNum; i++) {
+                String response_second = OrderGet.getOrderAdd(dataType, mall_id, secret, start_updated_at, end_updated_at, is_lucky_flag, refund_status, order_status,
+                        String.valueOf(i), String.valueOf(page_size), timestamp);
+                JSONObject myObj_second = JSONObject.parseObject(response_second);
+                if (myObj_second != null) {
+                    JSONObject object_second = myObj_second.getJSONObject("order_sn_increment_get_response");
+                    if (object_second != null) {
+                        List<PddOrder> pddOrderList = parsePddOrder(object_second/*, expresses*/);
+                        if (pddOrderList != null && pddOrderList.size() > 0) {
+                            pddOrders.addAll(pddOrderList);
                         }
                     }
                 }
             }
-            if (object != null) {
-                List<PddOrder> pddOrderList = parsePddOrder(object/*,expresses*/);
-                if(pddOrderList!=null&&pddOrderList.size()>0){
-                    pddOrders.addAll(pddOrderList);
-                }
+        }
+        if (object != null) {
+            List<PddOrder> pddOrderList = parsePddOrder(object/*,expresses*/);
+            if (pddOrderList != null && pddOrderList.size() > 0) {
+                pddOrders.addAll(pddOrderList);
             }
+        }
 //        } else {
 //            logger.error("平台：" + pddPlatform.getShopName() + ",未配置快递鸟账号，请配置后同步！");
 //        }
@@ -195,8 +255,13 @@ public class JobBean {
 //                        }
 //                    }
 //                } else {
+                if (pddOrder.getOrderStatus() != 3) {
+                    pddOrder.setPackageStatus(0);//已签收设置为已签收
+                    pddOrder.setUpdatedAt(new Date()); //最后更新时间
+                } else {
                     pddOrder.setPackageStatus(pddOrder.getOrderStatus());//已签收设置为已签收
                     pddOrder.setUpdatedAt(new Date()); //最后更新时间
+                }
 //                }
                 pddOrders.add(pddOrder);
             }

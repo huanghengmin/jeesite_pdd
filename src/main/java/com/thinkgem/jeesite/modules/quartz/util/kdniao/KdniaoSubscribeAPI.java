@@ -46,7 +46,8 @@ public class KdniaoSubscribeAPI {
         String AppKey = "aece4f2c-bb84-4e5b-87a3-258f090dbae7";
         KdniaoSubscribeAPI api = new KdniaoSubscribeAPI(EBusinessID, AppKey);
         try {
-            String result = api.orderTracesSubByJson("SF","3100707578976");
+//            String result = api.orderTracesSubByJson("SF","3100707578976");
+            String result = api.orderTracesSubByJson("STO","3337919847729");
             System.out.print(result);
 
         } catch (Exception e) {

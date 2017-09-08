@@ -19,6 +19,7 @@ import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.*;
 import com.thinkgem.jeesite.modules.sys.entity.User;
+import com.thinkgem.jeesite.modules.sys.service.SystemService;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class PddOrderController extends BaseController {
 
     @Autowired
     private PddLogisticsDao pddLogisticsDao;
+
+    @Autowired
+    private SystemService systemService;
 
     @ModelAttribute
     public PddOrder get(@RequestParam(required = false) String id) {
@@ -240,7 +244,7 @@ public class PddOrderController extends BaseController {
                     List<Data> data1 = data.getData();
                     for (Data d : data1) {
                         if (d.isSuccess()) {//成功
-                            PddOrder pddOrder = pddOrderService.getByLogisticCode(d.getLogisticCode());
+                            PddOrder pddOrder = UserUtils.getPddOrderByLogisticsCode(d.getLogisticCode());
                             if (pddOrder != null) {
                                 int status = d.getState();//物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
                                 if (status == 3) {

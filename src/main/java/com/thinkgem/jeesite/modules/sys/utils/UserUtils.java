@@ -60,10 +60,12 @@ public class UserUtils {
 
 	public static final String ORDER_CACHE = "orderCache";
 	public static final String ORDER_CACHE_ID_ = "id_";
+	public static final String ORDER_CACHE_LOGISTICSCODE_ = "logisticsCode_";
+	public static final String ORDER_CACHE_SN_ = "sn_";
 
 	public static final String LOGISTICS_CACHE = "logisticsCache";
 	public static final String LOGISTICS_CACHE_ID_ = "id_";
-	public static final String LOGISTICS_CACHE_LOGISTICSID_ = "id_";
+	public static final String LOGISTICS_CACHE_LOGISTICSID_ = "logisticsid_";
 
 	public static final String CACHE_AUTH_INFO = "authInfo";
 	public static final String CACHE_ROLE_LIST = "roleList";
@@ -149,6 +151,36 @@ public class UserUtils {
 				return null;
 			}
 			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_ID_ + pddOrder.getId(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_LOGISTICSCODE_ + pddOrder.getPddLogistics().getLogisticsCode(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_SN_ + pddOrder.getOrderSn(), pddOrder);
+		}
+		return pddOrder;
+	}
+
+	public static PddOrder getPddOrderByLogisticsCode(String logisticsCode){
+		PddOrder pddOrder = (PddOrder)CacheUtils.get(ORDER_CACHE, ORDER_CACHE_LOGISTICSCODE_ + logisticsCode);
+		if (pddOrder ==  null){
+			pddOrder = pddOrderDao.getByLogisticCode(logisticsCode);
+			if (pddOrder == null){
+				return null;
+			}
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_ID_ + pddOrder.getId(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_LOGISTICSCODE_ + pddOrder.getPddLogistics().getLogisticsCode(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_SN_ + pddOrder.getOrderSn(), pddOrder);
+		}
+		return pddOrder;
+	}
+
+	public static PddOrder getPddOrderBySn(String sn){
+		PddOrder pddOrder = (PddOrder)CacheUtils.get(ORDER_CACHE, ORDER_CACHE_SN_ + sn);
+		if (pddOrder ==  null){
+			pddOrder = pddOrderDao.getByOrderSn(sn);
+			if (pddOrder == null){
+				return null;
+			}
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_ID_ + pddOrder.getId(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_LOGISTICSCODE_ + pddOrder.getPddLogistics().getLogisticsCode(), pddOrder);
+			CacheUtils.put(ORDER_CACHE, ORDER_CACHE_SN_ + pddOrder.getOrderSn(), pddOrder);
 		}
 		return pddOrder;
 	}
@@ -188,6 +220,10 @@ public class UserUtils {
 		removeCache(CACHE_OFFICE_LIST);
 		removeCache(CACHE_OFFICE_ALL_LIST);
 		UserUtils.clearCache(getUser());
+	}
+
+	public static void clearOrderCache(){
+		removeCache(ORDER_CACHE);
 	}
 	
 	/**

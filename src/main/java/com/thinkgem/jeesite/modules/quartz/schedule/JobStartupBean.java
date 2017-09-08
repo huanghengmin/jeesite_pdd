@@ -1,21 +1,18 @@
 package com.thinkgem.jeesite.modules.quartz.schedule;
 
 import com.alibaba.fastjson.JSON;
-import com.aliyuncs.exceptions.ClientException;
 import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.pdd.email.model.Email;
+import com.thinkgem.jeesite.modules.pdd.email.model.Note;
 import com.thinkgem.jeesite.modules.pdd.email.queue.MailQueue;
-import com.thinkgem.jeesite.modules.pdd.email.queue.OrderQueue;
+import com.thinkgem.jeesite.modules.pdd.email.queue.NoteQueue;
 import com.thinkgem.jeesite.modules.pdd.entity.*;
 import com.thinkgem.jeesite.modules.pdd.service.PddOrderService;
-import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.KdniaoTrackQueryAPIEntity;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.Traces;
 import com.thinkgem.jeesite.modules.quartz.util.sms.PropertiesUtils;
-import com.thinkgem.jeesite.modules.quartz.util.sms.SMSLZUtils;
 import com.thinkgem.jeesite.modules.sys.entity.User;
-import com.thinkgem.jeesite.modules.sys.service.SystemService;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +38,6 @@ public class JobStartupBean {
 
     @Autowired
     private PddOrderService pddOrderService;
-
-    @Autowired
-    private SystemService systemService;
 
     public boolean sendPullRemand(User user, PddOrder pddOrder) {
         //邮件预警
@@ -82,19 +76,21 @@ public class JobStartupBean {
                     PddPhone pddPhone = pddPhones.get(i);
                     phones[i] = pddPhone.getPhone();
                 }
-                logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
+                if(phones!=null&&phones.length>0) {
+                    String result = StringUtils.join(phones, ",");
+                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
                 if (user.getNoteNumber() > 0) {
                     Properties p = PropertiesUtils.getProperties();
                     String VCode = p.getProperty("sms.pull");
                     String FreeSignName = p.getProperty("sms.FreeSignName");
+                    Note note = new Note(result,FreeSignName,VCode,"{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}",user);
                     try {
-                        SMSLZUtils.sendSms(phones.toString(), FreeSignName, VCode, "{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}");
-                    } catch (ClientException e) {
+                        NoteQueue.getNoteQueue().produce(note);
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                         return false;
                     }
-                    user.setNoteNumber(user.getNoteNumber() - 1);
-                    systemService.updateUserSet(user);
+                }
                 }
             }
         }
@@ -138,19 +134,21 @@ public class JobStartupBean {
                     PddPhone pddPhone = pddPhones.get(i);
                     phones[i] = pddPhone.getPhone();
                 }
-                logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
-                if (user.getNoteNumber() > 0) {
-                    Properties p = PropertiesUtils.getProperties();
-                    String VCode = p.getProperty("sms.second");
-                    String FreeSignName = p.getProperty("sms.FreeSignName");
-                    try {
-                        SMSLZUtils.sendSms(phones.toString(), FreeSignName, VCode, "{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}");
-                    } catch (ClientException e) {
-                        e.printStackTrace();
-                        return false;
+                if(phones!=null&&phones.length>0) {
+                    String result = StringUtils.join(phones, ",");
+                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
+                    if (user.getNoteNumber() > 0) {
+                        Properties p = PropertiesUtils.getProperties();
+                        String VCode = p.getProperty("sms.second");
+                        String FreeSignName = p.getProperty("sms.FreeSignName");
+                        Note note = new Note(result, FreeSignName, VCode, "{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}", user);
+                        try {
+                            NoteQueue.getNoteQueue().produce(note);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            return false;
+                        }
                     }
-                    user.setNoteNumber(user.getNoteNumber() - 1);
-                    systemService.updateUserSet(user);
                 }
             }
         }
@@ -158,10 +156,8 @@ public class JobStartupBean {
     }
 
     public void job(String string) throws Exception {
-        System.out.println("任务进行中。。。" + string);
-        PddOrder pddOrder_status = new PddOrder();
-        pddOrder_status.setPackageStatus(3);
-        List<PddOrder> pddOrderList = pddOrderService.findListByNotSignInStatus(pddOrder_status);
+        logger.info(string);
+        List<PddOrder> pddOrderList = pddOrderService.findListByNotSignInStatus();
         if (pddOrderList != null && pddOrderList.size() > 0) {
             for (PddOrder pddOrder : pddOrderList) {
                 if (pddOrder.getPackageStatus() != null) {
@@ -173,7 +169,7 @@ public class JobStartupBean {
                             if (user.isEnablePullRemand()) {
                                 if (user.getPullRemand() != null) {
                                     int pullRemand = user.getPullRemand();
-                                    if (new Date().getTime() - pddOrder.getUpdatedAt().getTime() >= pullRemand * 60 * 60 * 1000) {
+                                    if (new Date().getTime() - pddOrder.getShippingTime().getTime() >= pullRemand * 60 * 60 * 1000) {
                                         //此时应该检测一下快递
                                         List<PddExpress> pddExpresses = user.getPddExpressList();
                                         if (pddExpresses != null && pddExpresses.size() > 0) {
@@ -205,7 +201,9 @@ public class JobStartupBean {
                                                                 for (Traces traces1 : traces) {
                                                                     sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
                                                                 }
-                                                                if ((sb.toString()).equals(pddOrder.getLogisticInfo())) {//未更新
+                                                               String logisticInfo = pddOrder.getLogisticInfo();
+                                                               String result = sb.toString();
+                                                                if ((logisticInfo==null&&StringUtils.isEmpty(result))||result.equals(logisticInfo)) {//未更新
                                                                     //发送提醒
                                                                     sendPullRemand(user, pddOrder);
                                                                     //修改为预警
@@ -214,8 +212,12 @@ public class JobStartupBean {
                                                                         pddOrder.setUpdatedAt(new Date());
                                                                         pddOrderService.save(pddOrder);
                                                                         break;
-                                                                    } else if (pddOrder.getPackageStatus() == 1) {
-                                                                        pddOrder.setPackageStatus(6); //设置状态为5
+                                                                    }else if (pddOrder.getPackageStatus() == 1
+                                                                            ||pddOrder.getPackageStatus()==2
+                                                                            ||pddOrder.getPackageStatus()==4
+                                                                            ||pddOrder.getPackageStatus()==201
+                                                                            ) {
+                                                                        pddOrder.setPackageStatus(6); //设置状态为6
                                                                         pddOrder.setUpdatedAt(new Date());
                                                                         pddOrderService.save(pddOrder);
                                                                         break;
@@ -238,7 +240,7 @@ public class JobStartupBean {
                                 }
                             }
                         }
-                    } else if (status != 3) {//中转途中
+                    } else if (status != 3||status!=4||status!=5||status!=6) {//中转途中,预警订单不再预警
                         PddPlatform pddPlatform = UserUtils.getPlatform(pddOrder.getPddPlatform().getId());
                         User user = UserUtils.get(pddPlatform.getUser().getId());
                         if (user != null) {
@@ -277,7 +279,9 @@ public class JobStartupBean {
                                                                 for (Traces traces1 : traces) {
                                                                     sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
                                                                 }
-                                                                if ((sb.toString()).equals(pddOrder.getLogisticInfo())) {//未更新
+                                                                String logisticInfo = pddOrder.getLogisticInfo();
+                                                                String result = sb.toString();
+                                                                if ((logisticInfo==null&&StringUtils.isEmpty(result))||result.equals(logisticInfo)) {//未更新
                                                                     //发送提醒
                                                                     sendSecondRemand(user, pddOrder);
 
@@ -286,13 +290,16 @@ public class JobStartupBean {
                                                                         pddOrder.setUpdatedAt(new Date());
                                                                         pddOrderService.save(pddOrder);
                                                                         break;
-                                                                    } else if (pddOrder.getPackageStatus() == 1) {
-                                                                        pddOrder.setPackageStatus(6); //设置状态为5
-                                                                        pddOrderService.save(pddOrder);
+                                                                    } else if (pddOrder.getPackageStatus() == 1
+                                                                            ||pddOrder.getPackageStatus()==2
+                                                                            ||pddOrder.getPackageStatus()==4
+                                                                            ||pddOrder.getPackageStatus()==201
+                                                                            ) {
+                                                                        pddOrder.setPackageStatus(6); //设置状态为6
                                                                         pddOrder.setUpdatedAt(new Date());
+                                                                        pddOrderService.save(pddOrder);
                                                                         break;
                                                                     }
-                                                                    break;
                                                                 } else {
                                                                     pddOrder.setPackageStatus(status_query);
                                                                     pddOrder.setLogisticInfo(sb.toString());
@@ -312,9 +319,8 @@ public class JobStartupBean {
                         }
                     }
                 }
-                Thread.sleep(200);
+                Thread.sleep(100);
             }
-
         }
     }
 }

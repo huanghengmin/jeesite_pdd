@@ -163,10 +163,10 @@
                     pddOrder.packageStatus== 201}">
                         <c:choose>
                             <c:when test="${pddOrder.packageStatus== 0}">
-                                <span style="color:red" ><ct:Time type="SECOND" diff="${24*1000*60*60-(nowDate-pddOrder.updatedAt.time)}"/></span>
+                                <span style="color:red" >揽件：<ct:Time type="SECOND" diff="${user.pullRemand*1000*60*60-(nowDate-pddOrder.shippingTime.time)}"/></span>
                             </c:when>
                             <c:otherwise>
-                                <span style="color:red" ><ct:Time type="SECOND" diff="${24*1000*60*60-(nowDate-pddOrder.updatedAt.time)}"/></span>
+                                <span style="color:red" >中转:<ct:Time type="SECOND" diff="${user.secondRemand*1000*60*60-(nowDate-pddOrder.updatedAt.time)}"/></span>
                             </c:otherwise>
                         </c:choose>
                     </c:when>

@@ -116,6 +116,7 @@
 
 	<bean id="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="false">
 		<property name="jobFactory" ref="jobFactory"></property>
+		<property name="configLocation" value="classpath:quartz.properties"></property>
 	</bean>
 
 </beans>

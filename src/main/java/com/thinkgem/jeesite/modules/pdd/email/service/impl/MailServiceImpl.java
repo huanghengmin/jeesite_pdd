@@ -26,7 +26,8 @@ public class MailServiceImpl implements IMailService {
     private JavaMailSender mailSender;//执行者
 
     //@Value("${mail.username}")
-    public String USER_NAME="15107847@qq.com";//发送者
+//    public String USER_NAME="15107847@qq.com";//发送者
+    public String USER_NAME="laidongzhou@pddcall.com";//发送者
 
     @Override
     public void send(Email mail) throws Exception {

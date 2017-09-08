@@ -140,4 +140,21 @@ public class Data {
         StationAddress	String	派件网点地址	O
         StationTel	String	派件网点电话	O*/
 
+    @Override
+    public String toString() {
+        return "Data{" +
+                "EBusinessID='" + EBusinessID + '\'' +
+                ", OrderCode='" + OrderCode + '\'' +
+                ", ShipperCode='" + ShipperCode + '\'' +
+                ", LogisticCode='" + LogisticCode + '\'' +
+                ", Success=" + Success +
+                ", Reason='" + Reason + '\'' +
+                ", State=" + State +
+                ", CallBack='" + CallBack + '\'' +
+                ", Traces=" + Traces +
+                ", EstimatedDeliveryTime='" + EstimatedDeliveryTime + '\'' +
+                ", PickerInfo=" + PickerInfo +
+                ", SenderInfo=" + SenderInfo +
+                '}';
+    }
 }
