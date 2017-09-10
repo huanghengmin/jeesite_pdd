@@ -8,6 +8,7 @@ import java.util.List;
 import com.thinkgem.jeesite.common.persistence.CrudDao;
 import com.thinkgem.jeesite.common.persistence.annotation.MyBatisDao;
 import com.thinkgem.jeesite.modules.sys.entity.User;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户DAO接口
@@ -23,6 +24,13 @@ public interface UserDao extends CrudDao<User> {
 	 * @return
 	 */
 	public User getByLoginName(User user);
+
+	/**
+	 * 根据登录名称查询用户
+	 * @param cardNumber
+	 * @return
+	 */
+	public User getByCardNumber(String cardNumber);
 
 	/**
 	 * 通过OfficeId获取用户列表，仅返回用户id和name（树查询用户时用）
@@ -79,4 +87,7 @@ public interface UserDao extends CrudDao<User> {
 	 */
 	public int updateUserSet(User user);
 
+    User getByNoteNumber(String noteNumber);
+
+	User getByPlatformNumber(String platformNumber);
 }

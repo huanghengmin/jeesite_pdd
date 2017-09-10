@@ -38,13 +38,37 @@ public class QuartzListener implements ServletContextListener {
         consumeMailQueue= SpringContextHolder.getBean("consumeMailQueue");
         pddQuartzService= SpringContextHolder.getBean("pddQuartzService");
 
+        PddQuartz scheduleJobEntity_jobSyncBean = new PddQuartz();
+        scheduleJobEntity_jobSyncBean.setBeanName("jobSyncBean");
+        scheduleJobEntity_jobSyncBean.setMethodName("job");
+        scheduleJobEntity_jobSyncBean.setCreateDate(new Date());
+        scheduleJobEntity_jobSyncBean.setStatus(Constant.ScheduleStatus.NORMAL.getValue());
+        scheduleJobEntity_jobSyncBean.setCronExpression("0 0 0/3 * * ?");//3小时执行一次
+        scheduleJobEntity_jobSyncBean.setId("2222222222");
+        scheduleJobEntity_jobSyncBean.setRemarks("同步订单状态服务");
+        scheduleJobEntity_jobSyncBean.setParams("自启动同步订单状态服务");
+
+        Trigger.TriggerState state_jobSyncBean = ScheduleUtils.getJobStatus(quartzScheduler,scheduleJobEntity_jobSyncBean.getId());
+        if(state_jobSyncBean.name().equals("NONE")){
+            //NONE, NORMAL, PAUSED, COMPLETE, ERROR, BLOCKED;
+            logger.info("createScheduleJob");
+            ScheduleUtils.createScheduleJob(quartzScheduler,scheduleJobEntity_jobSyncBean);
+        }else if(state_jobSyncBean.name().equals("PAUSED")||state_jobSyncBean.equals("BLOCKED")){
+            logger.info("resumeJob");
+            ScheduleUtils.resumeJob(quartzScheduler,scheduleJobEntity_jobSyncBean.getId());
+        }else {
+            logger.info("updateScheduleJob");
+            ScheduleUtils.updateScheduleJob(quartzScheduler,scheduleJobEntity_jobSyncBean);
+        }
+        ScheduleUtils.run(quartzScheduler,scheduleJobEntity_jobSyncBean);
+
         PddQuartz scheduleJobEntity = new PddQuartz();
         scheduleJobEntity.setBeanName("jobStartupBean");
         scheduleJobEntity.setMethodName("job");
         scheduleJobEntity.setCreateDate(new Date());
         scheduleJobEntity.setStatus(Constant.ScheduleStatus.NORMAL.getValue());
         scheduleJobEntity.setCronExpression("0 0/30 * * * ?");//40分钟执行一次
-        scheduleJobEntity.setId("1111111111111111");
+        scheduleJobEntity.setId("1111111111");
         scheduleJobEntity.setRemarks("检测订单状态服务");
         scheduleJobEntity.setParams("自启动检测订单状态服务");
 

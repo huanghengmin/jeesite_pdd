@@ -52,17 +52,17 @@ public class JobStartupBean {
                     emails[i] = pddEmail.getEmail();
                 }
                 logger.info("邮件提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
-                Email mail = new Email();
-                mail.setEmail(emails);
-                mail.setSubject("揽件预警");
-                mail.setContent("订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
-                mail.setTemplate("welcome");
-                try {
-                    MailQueue.getMailQueue().produce(mail);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return false;
-                }
+//                Email mail = new Email();
+//                mail.setEmail(emails);
+//                mail.setSubject("揽件预警");
+//                mail.setContent("订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
+//                mail.setTemplate("welcome");
+//                try {
+//                    MailQueue.getMailQueue().produce(mail);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                    return false;
+//                }
             }
         }
         //短信预警
@@ -76,22 +76,22 @@ public class JobStartupBean {
                     PddPhone pddPhone = pddPhones.get(i);
                     phones[i] = pddPhone.getPhone();
                 }
-                if(phones!=null&&phones.length>0) {
-                    String result = StringUtils.join(phones, ",");
-                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
-                if (user.getNoteNumber() > 0) {
-                    Properties p = PropertiesUtils.getProperties();
-                    String VCode = p.getProperty("sms.pull");
-                    String FreeSignName = p.getProperty("sms.FreeSignName");
-                    Note note = new Note(result,FreeSignName,VCode,"{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}",user);
-                    try {
-                        NoteQueue.getNoteQueue().produce(note);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                }
-                }
+//                if(phones!=null&&phones.length>0) {
+//                    String result = StringUtils.join(phones, ",");
+//                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间未揽件！请注意，规避虚假发货！");
+//                if (user.getNoteNumber() > 0) {
+//                    Properties p = PropertiesUtils.getProperties();
+//                    String VCode = p.getProperty("sms.pull");
+//                    String FreeSignName = p.getProperty("sms.FreeSignName");
+//                    Note note = new Note(result,FreeSignName,VCode,"{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}",user);
+//                    try {
+//                        NoteQueue.getNoteQueue().produce(note);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                        return false;
+//                    }
+//                }
+//                }
             }
         }
         return true;
@@ -110,17 +110,17 @@ public class JobStartupBean {
                     emails[i] = pddEmail.getEmail();
                 }
                 logger.info("邮件提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
-                Email mail = new Email();
-                mail.setEmail(emails);
-                mail.setSubject("揽件预警");
-                mail.setContent("订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
-                mail.setTemplate("welcome");
-                try {
-                    MailQueue.getMailQueue().produce(mail);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return false;
-                }
+//                Email mail = new Email();
+//                mail.setEmail(emails);
+//                mail.setSubject("揽件预警");
+//                mail.setContent("订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
+//                mail.setTemplate("welcome");
+//                try {
+//                    MailQueue.getMailQueue().produce(mail);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                    return false;
+//                }
             }
         }
         //短信预警
@@ -134,22 +134,22 @@ public class JobStartupBean {
                     PddPhone pddPhone = pddPhones.get(i);
                     phones[i] = pddPhone.getPhone();
                 }
-                if(phones!=null&&phones.length>0) {
-                    String result = StringUtils.join(phones, ",");
-                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
-                    if (user.getNoteNumber() > 0) {
-                        Properties p = PropertiesUtils.getProperties();
-                        String VCode = p.getProperty("sms.second");
-                        String FreeSignName = p.getProperty("sms.FreeSignName");
-                        Note note = new Note(result, FreeSignName, VCode, "{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}", user);
-                        try {
-                            NoteQueue.getNoteQueue().produce(note);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            return false;
-                        }
-                    }
-                }
+//                if(phones!=null&&phones.length>0) {
+//                    String result = StringUtils.join(phones, ",");
+//                    logger.info("短信提醒订单：" + pddOrder.getOrderSn() + ",快递单号:" + pddOrder.getTrackingNumber() + ",超过预警时间二次未揽件！请注意，规避虚假发货！");
+//                    if (user.getNoteNumber() > 0) {
+//                        Properties p = PropertiesUtils.getProperties();
+//                        String VCode = p.getProperty("sms.second");
+//                        String FreeSignName = p.getProperty("sms.FreeSignName");
+//                        Note note = new Note(result, FreeSignName, VCode, "{\"order_sn\":\"" + pddOrder.getOrderSn() + "\"}", user);
+//                        try {
+//                            NoteQueue.getNoteQueue().produce(note);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                            return false;
+//                        }
+//                    }
+//                }
             }
         }
         return true;

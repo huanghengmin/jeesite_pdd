@@ -16,6 +16,7 @@ import com.thinkgem.jeesite.modules.pdd.dao.PddPhoneDao;
 import com.thinkgem.jeesite.modules.pdd.entity.PddEmail;
 import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPhone;
+import com.thinkgem.jeesite.modules.quartz.net.Check;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -95,19 +96,59 @@ public class UserController extends BaseController {
 			addMessage(redirectAttributes, "演示模式，不允许操作！");
 			return "modules/sys/userSet";
 		}
-		User currentUser = UserUtils.getUser();
-		currentUser.setEmailRemand(user.getEmailRemand());
-		currentUser.setPullRemand(user.getPullRemand());
-		currentUser.setSecondRemand(user.getSecondRemand());
-		currentUser.setPhoneRemand(user.getPhoneRemand());
-		currentUser.setOrderCycle(user.getOrderCycle());
-		currentUser.setEnablePullRemand(user.isEnablePullRemand());
-		currentUser.setEnableSecondRemand(user.isEnableSecondRemand());
-		currentUser.setEnableOrderCycle(user.isEnableOrderCycle());
-		systemService.updateUserSet(currentUser);
-		model.addAttribute("message", "保存用户设置成功");
-		model.addAttribute("user", currentUser);
-		return "modules/sys/userSet";
+		User user_sql = systemService.getByCardNumber(user.getCardNumber());
+		if(user_sql!=null&&!user_sql.getId().equals(user.getId())){
+			model.addAttribute("message", "保存用户设置失败,登陆卡已被使用");
+			return "modules/sys/userSet";
+		}else {
+			String result = Check.zdy_login(user.getCardNumber()); //校验登陆卡
+			if(result!=null&&result.length()>0) {
+				String[] ss = result.split("<\\|>");
+				if (Long.parseLong(ss[0]) <= 0) {
+					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
+					return "modules/sys/userSet";
+				}
+			}
+
+			User user_sql_ = UserUtils.getByPlatformNumber(user.getPlatformNumber());
+			if(user_sql_!=null&&!user_sql.getId().equals(user.getId())){
+				model.addAttribute("message", "保存用户设置失败,平台卡已被使用");
+				return "modules/sys/userSet";
+			}
+
+			String result_num = Check.zdy_kd(user.getPlatformNumber(),"1","0");
+			if(Integer.parseInt(result_num)<=0){
+				addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，平台卡已无可用次数");
+				return "modules/sys/userSet";
+			}
+
+			User user_sql_n = UserUtils.getByNoteNumber(user.getNoteNumber());
+			if(user_sql_n!=null&&!user_sql.getId().equals(user.getId())){
+				model.addAttribute("message", "保存用户设置失败,短信卡已被使用");
+				return "modules/sys/userSet";
+			}
+
+			String result_note = Check.zdy_kd(user.getNoteNumber(),"1","0");
+			if(Integer.parseInt(result_note)<=0){
+				addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，短信卡已无可用次数");
+				return "modules/sys/userSet";
+			}
+
+			User currentUser = UserUtils.getUser();
+			currentUser.setEmailRemand(user.getEmailRemand());
+			currentUser.setPullRemand(user.getPullRemand());
+			currentUser.setSecondRemand(user.getSecondRemand());
+			currentUser.setPhoneRemand(user.getPhoneRemand());
+			currentUser.setOrderCycle(user.getOrderCycle());
+			currentUser.setEnablePullRemand(user.isEnablePullRemand());
+			currentUser.setEnableSecondRemand(user.isEnableSecondRemand());
+			currentUser.setCardNumber(user.getCardNumber());
+			currentUser.setEnableOrderCycle(user.isEnableOrderCycle());
+			systemService.updateUserSet(currentUser);
+			model.addAttribute("message", "保存用户设置成功");
+			model.addAttribute("user", currentUser);
+			return "modules/sys/userSet";
+		}
 	}
 	
 	@ResponseBody

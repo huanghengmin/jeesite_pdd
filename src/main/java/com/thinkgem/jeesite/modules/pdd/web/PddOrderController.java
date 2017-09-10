@@ -9,13 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.alibaba.fastjson.JSON;
 import com.thinkgem.jeesite.common.utils.DateUtils;
 import com.thinkgem.jeesite.modules.pdd.dao.PddLogisticsDao;
-import com.thinkgem.jeesite.modules.pdd.email.queue.OrderQueue;
 import com.thinkgem.jeesite.modules.pdd.entity.PddExpress;
 import com.thinkgem.jeesite.modules.pdd.entity.PddLogistics;
 import com.thinkgem.jeesite.modules.pdd.entity.PddPlatform;
 import com.thinkgem.jeesite.modules.pdd.service.PddPlatformService;
-//import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdApiOrderDistinguish;
-//import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoSubscribeAPI;
+import com.thinkgem.jeesite.modules.quartz.sync.PullThread;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoTrackQueryAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.*;
 import com.thinkgem.jeesite.modules.sys.entity.User;
@@ -50,7 +48,7 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "${adminPath}/pdd/pddOrder")
 public class PddOrderController extends BaseController {
-        private static final String EBusinessID = "1290729";//
+    private static final String EBusinessID = "1290729";//
 //    private static final String EBusinessID = "1301687";//hhm
 
 //    private static final String apiKey = "aece4f2c-bb84-4e5b-87a3-258f090dbae7"; //hhm
@@ -82,7 +80,7 @@ public class PddOrderController extends BaseController {
     @RequiresPermissions("pdd:pddOrder:view")
     @RequestMapping(value = {"list", ""})
     public String list(PddOrder pddOrder, HttpServletRequest request, HttpServletResponse response, Model model) {
-        if (pddOrder.getPddPlatform() != null&&StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId())) {
+        if (pddOrder.getPddPlatform() != null && StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId())) {
             Page<PddOrder> page = pddOrderService.findPage(new Page<PddOrder>(request, response), pddOrder);
             model.addAttribute("page", page);
             model.addAttribute("user", UserUtils.getUser());
@@ -201,12 +199,13 @@ public class PddOrderController extends BaseController {
 //							}
 //						}
                             }
-                        } {
+                        }
+                        {
                             //同步快递
                             addMessage(redirectAttributes, "同步订单信息失败");
                             return "redirect:" + Global.getAdminPath() + "/pdd/pddOrder/?repage";
                         }
-                    }else {
+                    } else {
                         //同步快递
                         addMessage(redirectAttributes, "同步订单信息失败");
                         return "redirect:" + Global.getAdminPath() + "/pdd/pddOrder/?repage";
@@ -229,6 +228,22 @@ public class PddOrderController extends BaseController {
         return "redirect:" + Global.getAdminPath() + "/pdd/pddOrder/?repage";
     }
 
+
+    @RequiresPermissions("pdd:pddOrder:edit")
+    @RequestMapping("/delSelect")
+    public String delSelect(HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        String items = request.getParameter("ids");
+        if (items != null) {
+            String[] strs = items.split(",");
+            for (int i = 0; i < strs.length; i++) {
+                String a = strs[i];
+                pddOrderService.delete(new PddOrder(a));
+            }
+        }
+        addMessage(redirectAttributes, "批量删除订单完成");
+        return "redirect:" + Global.getAdminPath() + "/pdd/pddOrder/?repage";
+    }
+
     @RequestMapping({"/pull"})
     @ResponseBody
     public String pull(HttpServletRequest request, HttpServletResponse response) {
@@ -238,46 +253,10 @@ public class PddOrderController extends BaseController {
         //解析数据
         try {
             if (RequestType != null && RequestType.equals(ResponseData.type_101)) { // 推送数据
-                ResponseData data = JSON.parseObject(RequestData, ResponseData.class);//Weibo类在下边定义
-                logger.info("推送返回数据:" + data.toString());
-                if (data != null && data.getData() != null) {
-                    List<Data> data1 = data.getData();
-                    for (Data d : data1) {
-                        if (d.isSuccess()) {//成功
-                            PddOrder pddOrder = UserUtils.getPddOrderByLogisticsCode(d.getLogisticCode());
-                            if (pddOrder != null) {
-                                int status = d.getState();//物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
-                                if (status == 3) {
-                                    if (pddOrder.getOrderStatus() != 3) {//发货状态，1:待发货，2:已发货待签收，3:已签 收 5:全部 暂时只开放待发货订单查询
-                                        pddOrder.setOrderStatus(3);
-                                    }
-                                }
-                                pddOrder.setPackageStatus(status);
-                                List<Traces> traces = d.getTraces();
-                                StringBuilder sb = new StringBuilder();
-                                for (Traces traces1 : traces) {
-                                    sb.append(traces1.getAcceptTime()).append(traces1.getAcceptStation()).append("\n");
-                                }
-                                pddOrder.setLogisticInfo(sb.toString());
-                                pddOrder.setUpdatedAt(new Date()); //最后更新时间
-                                pddOrderService.save(pddOrder);
-                                logger.info("推送数据保存成功" + pddOrder.getTrackingNumber() + ",状态" + status);
-                                String requestData = "{\"EBusinessID\":\"" + EBusinessID + "\",\"UpdateTime\":\"" + DateUtils.formatDateTime(new Date()) + "\",\"Success\":" + false + ",\"Reason\":\"\"}";
-                                return requestData;
-//                                if (status != 3) { //物流状态: 0-无轨迹，1-已揽收，2-在途中 201-到达派件城市，3-签收,4-问题件
-                                //订阅订单信息
-//                                    OrderQueue.getOrderQueue().produce(pddOrder);
-                                    /*KdniaoSubscribeAPI qapi = new KdniaoSubscribeAPI(EBusinessID, apiKey);
-                                    String data2 = qapi.orderTracesSubByJson(pddOrder.getPddLogistics().getLogisticsCode(), pddOrder.getTrackingNumber());
-                                    Result result = JSON.parseObject(data2, Result.class);
-                                    if (result.isSuccess()) {
-                                        logger.info("注册推送：结果："+result+",快递编码：" + pddOrder.getPddLogistics().getLogisticsCode() + ",单号：" + pddOrder.getTrackingNumber() + "时间：" + DateUtils.formatDateTime(new Date()));
-                                    }*/
-//                                }
-                            }
-                        }
-                    }
-                }
+                PullThread pullThread = new PullThread(RequestData, pddOrderService);
+                pullThread.start();
+                String requestData = "{\"EBusinessID\":\"" + EBusinessID + "\",\"UpdateTime\":\"" + DateUtils.formatDateTime(new Date()) + "\",\"Success\":" + true + ",\"Reason\":\"\"}";
+                return requestData;
             }
         } catch (Exception e) {
             e.printStackTrace();

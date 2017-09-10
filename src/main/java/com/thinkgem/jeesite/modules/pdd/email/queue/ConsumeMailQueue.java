@@ -6,6 +6,7 @@ import com.thinkgem.jeesite.modules.pdd.email.model.Email;
 import com.thinkgem.jeesite.modules.pdd.email.model.Note;
 import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
+import com.thinkgem.jeesite.modules.quartz.net.Check;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.KdniaoSubscribeAPI;
 import com.thinkgem.jeesite.modules.quartz.util.kdniao.entity.Result;
 import com.thinkgem.jeesite.modules.quartz.util.sms.SMSLZUtils;
@@ -67,7 +68,7 @@ public class ConsumeMailQueue {
                     if (mail != null) {
                         logger.info("剩余邮件总数:{}", MailQueue.getMailQueue().size());
                         mailService.send(mail);
-                        Thread.sleep(1000 * 2);
+                        Thread.sleep(1000);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -90,7 +91,7 @@ public class ConsumeMailQueue {
                             logger.info("注册推送：结果：" + result + ",快递编码：" + pddOrder.getPddLogistics().getLogisticsCode() + ",单号：" + pddOrder.getTrackingNumber() + "时间：" + DateUtils.formatDateTime(new Date()));
                         }
                     }
-                    Thread.sleep(1000 * 2);
+                    Thread.sleep(100);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -111,12 +112,15 @@ public class ConsumeMailQueue {
                 try {
                     Note note = NoteQueue.getNoteQueue().consume();
                     if (note != null) {
-                        logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
-                        SMSLZUtils.sendSms(note.getPhones(), note.getSignName(),note.getTemplateCode(),note.getJson_params());
                         User u = note.getUser();
-                        u.setNoteNumber(u.getNoteNumber() - 1);
-                        systemService.updateUserSet(u);
-                        Thread.sleep(1000 * 2);
+                        String num = u.getNoteNumber();
+                        String result = Check.zdy_kd(num,"1","0");
+                        if(Integer.parseInt(result)>0){
+                            logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
+                            SMSLZUtils.sendSms(note.getPhones(), note.getSignName(),note.getTemplateCode(),note.getJson_params());
+                            Check.zdy_kd(num,"0","1");
+                        }
+                        Thread.sleep(1000);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -5,6 +5,7 @@ package com.thinkgem.jeesite.modules.pdd.service;
 
 import java.util.List;
 
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.sys.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	@Transactional(readOnly = false)
 	public void save(PddOrder pddOrder) {
 		super.save(pddOrder);
+		if(pddOrder.getPddPlatform()!=null&& StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId()))
 		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
 		UserUtils.clearOrderCache(pddOrder);
 	}
@@ -51,6 +53,7 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	@Transactional(readOnly = false)
 	public void delete(PddOrder pddOrder) {
 		super.delete(pddOrder);
+		if(pddOrder.getPddPlatform()!=null&& StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId()))
 		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
 		UserUtils.clearOrderCache(pddOrder);
 	}
@@ -73,6 +76,7 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	 */
 	@Transactional(readOnly = false)
 	public int updateByOrderSn(PddOrder pddOrder){
+		if(pddOrder.getPddPlatform()!=null&& StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId()))
 		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
 		UserUtils.clearOrderCache(pddOrder);
 		return pddOrderDao.updateByOrderSn(pddOrder);
@@ -95,6 +99,7 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 
 	@Transactional(readOnly = false)
 	public PddOrder updateByLogisticCode(PddOrder pddOrder){
+		if(pddOrder.getPddPlatform()!=null&& StringUtils.isNotEmpty(pddOrder.getPddPlatform().getId()))
 		UserUtils.clearPlatformCache(pddOrder.getPddPlatform());
 		UserUtils.clearOrderCache(pddOrder);
 		return pddOrderDao.updateByLogisticCode(pddOrder);
@@ -114,5 +119,9 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 
 	public List<PddOrder> findListByPlatformNotSignInStatus(PddOrder pddOrder){
 		return pddOrderDao.findListByPlatformNotSignInStatus(pddOrder);
+	}
+
+	public List<PddOrder> findListByNotPullExpress(PddOrder pddOrder) {
+		return pddOrderDao.findListByNotPullExpress(pddOrder);
 	}
 }

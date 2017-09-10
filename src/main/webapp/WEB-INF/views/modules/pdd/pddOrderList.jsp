@@ -11,6 +11,42 @@
 
         });
 
+        function checkAll(obj) {
+            if ($(obj).prop("checked")) {
+                $("[name = checkbox]:checkbox").attr("checked", true);
+            } else {
+                $("[name = checkbox]:checkbox").attr("checked", false);
+            }
+        }
+        
+        function delAll() {
+            //判断至少写了一项
+            var checkedNum = $('input[name="checkbox"]:checked').length;
+            if(checkedNum==0){
+                alert("请至少选择一项!");
+                return false;
+            }
+            if(confirm("确定删除所选项目?")){
+                var checkedList = new Array();
+                $("input[name='checkbox']:checked").each(function(){
+                    checkedList.push($(this).val());
+                });
+                $.ajax({
+                    type:"POST",
+                    url:"${ctx}/pdd/pddOrder/delSelect",
+                    data:{"ids":checkedList.toString()},
+                    success:function(data){
+                        $("[name='checkbox']:checkbox").attr("checked",false);
+                        $("[name='checkAll']:checkbox").attr("checked",false);
+                        location.reload();//页面刷新
+                    },
+                    error:function(data){
+                        alert('删除失败!');
+                    }
+                });
+            }
+        }
+
         function page(n, s) {
             $("#pageNo").val(n);
             $("#pageSize").val(s);
@@ -102,14 +138,19 @@
                               htmlEscape="false"/>
             </form:select>
         </li>
-        <li class="btns"><input id="btnSubmit" class="btn btn-primary" type="submit" value="查询"/></li>
-        <li class="clearfix"></li>
+        <li class="btns"><input id="btnSubmit" class="btn btn-primary" type="submit" value="查询"/>
+            <input id="btnDelete" class="btn btn-primary" type="button" onclick="delAll()" value="删除选中"/>
+        </li>
     </ul>
 </form:form>
 <sys:message content="${message}"/>
+
+
 <table id="contentTable" class="table table-striped table-bordered table-condensed">
+
     <thead>
     <tr>
+        <td align="center"><input type="checkbox" name="checkAll" onchange="checkAll(this)" /></td>
         <th>所属平台</th>
         <th>快递公司</th>
         <th>快递编号</th>
@@ -136,7 +177,7 @@
     <tbody>
     <c:forEach items="${page.list}" var="pddOrder">
         <tr>
-
+            <td align="center"><input type="checkbox" name="checkbox" value="${pddOrder.id}"></td>
             <td><a href="${ctx}/pdd/pddOrder/form?id=${pddOrder.id}">
                     ${pddOrder.pddPlatform.shopName}</a>
             </td>

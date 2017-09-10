@@ -55,12 +55,13 @@ public class User extends DataEntity<User> {
 	private Date oldLoginDate;	// 上次登陆日期
 
 	private Integer pullRemand; //揽件提醒
-	private Integer secondRemand;//二次揽件提醒
+	private Integer secondRemand; //二次揽件提醒
+	private String  cardNumber;   //绑定卡号
 	private Integer orderCycle;		//订单同步周期
 	private Integer phoneRemand;		// 短信提醒
 	private Integer emailRemand;		// 邮箱提醒
-	private Integer platformNumber;
-	private Integer noteNumber;
+	private String platformNumber;
+	private String noteNumber;
 	private boolean enablePullRemand; //启用揽件提醒
 	private boolean enableSecondRemand;//启用二次揽件提醒
 	private boolean enableOrderCycle; //启用订单同步
@@ -413,19 +414,19 @@ public class User extends DataEntity<User> {
 		this.emailRemand = emailRemand;
 	}
 
-	public Integer getPlatformNumber() {
+	public String getPlatformNumber() {
 		return platformNumber;
 	}
 
-	public void setPlatformNumber(Integer platformNumber) {
+	public void setPlatformNumber(String platformNumber) {
 		this.platformNumber = platformNumber;
 	}
 
-	public Integer getNoteNumber() {
+	public String getNoteNumber() {
 		return noteNumber;
 	}
 
-	public void setNoteNumber(Integer noteNumber) {
+	public void setNoteNumber(String noteNumber) {
 		this.noteNumber = noteNumber;
 	}
 
@@ -451,5 +452,13 @@ public class User extends DataEntity<User> {
 
 	public void setEnableOrderCycle(boolean enableOrderCycle) {
 		this.enableOrderCycle = enableOrderCycle;
+	}
+
+	public String getCardNumber() {
+		return cardNumber;
+	}
+
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
 	}
 }

@@ -5,8 +5,6 @@ package com.thinkgem.jeesite.modules.sys.utils;
 
 import java.util.List;
 
-//import com.thinkgem.jeesite.modules.pdd.dao.PddOrderDao;
-//import com.thinkgem.jeesite.modules.pdd.entity.PddOrder;
 import com.thinkgem.jeesite.modules.pdd.dao.*;
 import com.thinkgem.jeesite.modules.pdd.entity.*;
 import org.apache.shiro.SecurityUtils;
@@ -205,6 +203,35 @@ public class UserUtils {
 
 			CacheUtils.put(USER_CACHE, USER_CACHE_ID_ + user.getId(), user);
 			CacheUtils.put(USER_CACHE, USER_CACHE_LOGIN_NAME_ + user.getLoginName(), user);
+		}
+		return user;
+	}
+
+	/**
+	 * 根据登录名获取用户
+	 * @param cardNumber
+	 * @return 取不到返回null
+	 */
+	public static User getByCardNumber(String cardNumber){
+			User user = userDao.getByCardNumber(cardNumber);
+			if (user == null){
+				return null;
+			}
+		return user;
+	}
+
+	public static User getByPlatformNumber(String platformNumber){
+		User user = userDao.getByPlatformNumber(platformNumber);
+		if (user == null){
+			return null;
+		}
+		return user;
+	}
+
+	public static User getByNoteNumber(String noteNumber){
+		User user = userDao.getByNoteNumber(noteNumber);
+		if (user == null){
+			return null;
 		}
 		return user;
 	}

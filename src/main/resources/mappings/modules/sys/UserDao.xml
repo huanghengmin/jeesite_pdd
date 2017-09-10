@@ -83,6 +83,7 @@
 		a.pull_remand AS "pullRemand",
 		a.enable_pull_remand AS "enablePullRemand",
 		a.second_Remand AS "secondRemand",
+		a.card_number AS "cardNumber",
 		a.enable_second_Remand AS "enableSecondRemand",
 		a.order_cycle AS "orderCycle",
 		a.enable_order_cycle AS "enableOrderCycle",
@@ -142,6 +143,36 @@
 		<include refid="userJoins"/><!--
 		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
 		WHERE a.id = #{id}
+	</select>
+
+	<select id="getByNoteNumber" resultType="User">
+		SELECT
+		<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!--
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.note_number = #{noteNumber}
+	</select>
+
+	<select id="getByPlatformNumber" resultType="User">
+		SELECT
+		<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!--
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.platform_number = #{platformNumber}
+	</select>
+
+	<select id="getByCardNumber" resultType="User">
+		SELECT
+		<include refid="userColumns"/><!-- ,
+			ro.office_id AS "roleList.officeList.id" -->
+		FROM sys_user a
+		<include refid="userJoins"/><!--
+		LEFT JOIN sys_role_office ro ON ro.role_id = r.id -->
+		WHERE a.card_number = #{cardNumber}
 	</select>
 
 	<!-- 根据登录名查询用户 -->
@@ -335,6 +366,7 @@
 			enable_pull_remand = #{enablePullRemand},
 			second_Remand = #{secondRemand},
 			enable_second_Remand = #{enableSecondRemand},
+			card_number = #{cardNumber},
 			order_cycle = #{orderCycle},
 			enable_order_cycle = #{enableOrderCycle},
 			phone_remand = #{phoneRemand},

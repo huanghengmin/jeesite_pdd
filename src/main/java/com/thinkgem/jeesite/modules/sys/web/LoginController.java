@@ -17,6 +17,7 @@ import com.thinkgem.jeesite.modules.pdd.email.model.Email;
 import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddVcode;
 import com.thinkgem.jeesite.modules.pdd.service.PddVcodeService;
+import com.thinkgem.jeesite.modules.quartz.net.Check;
 import com.thinkgem.jeesite.modules.sys.entity.Role;
 import com.thinkgem.jeesite.modules.sys.entity.User;
 import com.thinkgem.jeesite.modules.sys.service.OfficeService;
@@ -169,6 +170,40 @@ public class LoginController extends BaseController{
 			}
 		}addMessage(model, "注册用户失败：验证码不匹配"+phone);
 		return "modules/sys/sysRegister";
+	}
+
+	@RequestMapping(value = "${adminPath}/card/index")
+	public String bindCard(HttpServletRequest request, HttpServletResponse response, Model model) {
+		String username = request.getParameter("username");
+		String cardnumber = request.getParameter("cardnumber");
+		if(username!=null&&cardnumber!=null){
+			User user = systemService.getUserByLoginName(username);
+			if ( user== null){
+				addMessage(model, "用户'" + user.getLoginName() + "未找到，绑定失败");
+				return "modules/sys/sysCardIndex";
+			}
+			String result = Check.zdy_login(cardnumber); //校验登陆卡
+			if(result!=null&&result.length()>0){
+				String[] ss = result.split("<\\|>");
+				if(Long.parseLong(ss[0])<=0){
+					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
+					return "modules/sys/sysCardIndex";
+				}else {
+					User user_sql = systemService.getByCardNumber(cardnumber);
+					if(user_sql!=null){
+						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，卡号已绑定");
+						return "modules/sys/sysLogin";
+					}else {
+						user.setCardNumber(cardnumber);
+						systemService.updateUserSet(user);
+						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡成功，请重新登陆");
+						return "modules/sys/sysLogin";
+					}
+				}
+			}
+		}
+		addMessage(model, "绑定登陆卡失败：用户"+username);
+		return "modules/sys/sysCardIndex";
 	}
 
 

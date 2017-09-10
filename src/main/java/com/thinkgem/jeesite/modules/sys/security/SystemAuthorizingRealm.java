@@ -5,10 +5,12 @@ package com.thinkgem.jeesite.modules.sys.security;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.thinkgem.jeesite.modules.quartz.net.Check;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -83,8 +85,28 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 			if (Global.NO.equals(user.getLoginFlag())){
 				throw new AuthenticationException("msg:该已帐号禁止登录.");
 			}
+			List<Role> roles = user.getRoleList();
+			if(roles!=null&&roles.size()>0){
+				Role role = roles.get(0);
+				if(role.getId().equals("6")){ //普通用户
+					if(user.getCardNumber()!=null&&user.getCardNumber().length()>0){
+						String result = Check.zdy_login(user.getCardNumber()); //校验登陆卡
+						if(result!=null&&result.length()>0){
+							String[] ss = result.split("<\\|>");
+							if(Long.parseLong(ss[0])<=0){
+								throw new AuthenticationException("msg:绑定登陆卡已过期.请重新绑定新卡！");
+							}
+						}
+					}else {
+						if(new Date().getTime()- user.getCreateDate().getTime()>1000*60*60*24*7){ //试用7天
+							throw new AuthenticationException("msg:7天试用期已过，请绑定登陆卡！");
+						}
+					}
+				}
+			}
+
 			byte[] salt = Encodes.decodeHex(user.getPassword().substring(0,16));
-			return new SimpleAuthenticationInfo(new Principal(user, token.isMobileLogin()), 
+			return new SimpleAuthenticationInfo(new Principal(user, token.isMobileLogin()),
 					user.getPassword().substring(16), ByteSource.Util.bytes(salt), getName());
 		} else {
 			return null;

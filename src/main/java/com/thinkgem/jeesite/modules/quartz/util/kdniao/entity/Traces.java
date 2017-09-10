@@ -31,4 +31,13 @@ public class Traces {
     public void setRemark(String remark) {
         Remark = remark;
     }
+
+    @Override
+    public String toString() {
+        return "Traces{" +
+                "AcceptTime='" + AcceptTime + '\'' +
+                ", AcceptStation='" + AcceptStation + '\'' +
+                ", Remark='" + Remark + '\'' +
+                '}';
+    }
 }

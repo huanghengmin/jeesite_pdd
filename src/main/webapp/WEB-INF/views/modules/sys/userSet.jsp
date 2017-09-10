@@ -49,12 +49,13 @@
             //$( "#amount_shamRemand" ).val( $( "#slider-range-shamRemand" ).slider( "value" ) );
 
             $( "#slider-range-orderCycle" ).slider({
-                min: 3,
+                min: 1,
                 max: 23,
                 slide: function( event, ui ) {
                     $( "#amount_orderCycle" ).val( ui.value );
                 }
             });
+
         });
 	</script>
 </head>
@@ -104,7 +105,8 @@
 				<div class="input-xlarge"   id="slider-range-orderCycle" ></div>
 			</div>
 		</div>
-		<<div class="control-group">
+
+		<div class="control-group">
 			<label class="control-label">短信提醒：</label>
 			<div class="controls">
 				<form:radiobuttons path="phoneRemand" items="${fns:getDictList('status')}" itemLabel="label" itemValue="value" htmlEscape="false" class=""/>
@@ -118,16 +120,26 @@
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">短信数量：</label>
+			<label class="control-label">账号期卡：</label>
 			<div class="controls">
-				<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+				<form:input path="cardNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+				<a href="http://www.youka.la/category/3C747E6FCDBFA105?1">购买链接</a>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">平台数量：</label>
+			<label class="control-label">短信数量卡：</label>
+			<div class="controls">
+				<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+				<a href="http://www.youka.la/category/B3AE84B4A7ACDA75?1">购买链接</a>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">店铺数量卡：</label>
 			<div class="controls">
 				<form:input path="platformNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+				<a href="http://www.youka.la/category/397127884A6E9CEF?1">购买链接</a>
 			</div>
 		</div>
 		<div class="form-actions">

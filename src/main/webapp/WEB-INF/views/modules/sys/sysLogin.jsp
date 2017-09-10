@@ -151,6 +151,7 @@
 	<div  class="input-block-level required">
 		<a href="${ctx}/register/index">手机注册</a>&nbsp;
 		<a href="${ctx}/register/emailIndex">邮件注册</a>&nbsp;
+		<a href="${ctx}/card/index">绑定登陆卡</a>&nbsp;
 
 
 		<%--|&nbsp;<a
