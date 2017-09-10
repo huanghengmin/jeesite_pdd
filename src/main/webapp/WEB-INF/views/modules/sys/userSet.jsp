@@ -120,9 +120,10 @@
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">账号期卡：</label>
+			<label class="control-label">激活卡号：</label>
 			<div class="controls">
 				<form:input path="cardNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+                <label>到期时间: <fmt:formatDate value="${user.cardEndDate}" pattern="yyyy-MM-dd HH:mm:ss"/></label>
 				<a href="http://www.youka.la/category/3C747E6FCDBFA105?1">购买链接</a>
 			</div>
 		</div>
@@ -131,6 +132,7 @@
 			<label class="control-label">短信数量卡：</label>
 			<div class="controls">
 				<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+                <label>剩余数量: ${user.noteCount}</label>
 				<a href="http://www.youka.la/category/B3AE84B4A7ACDA75?1">购买链接</a>
 			</div>
 		</div>
@@ -139,6 +141,7 @@
 			<label class="control-label">店铺数量卡：</label>
 			<div class="controls">
 				<form:input path="platformNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
+                <label>剩余数量: ${user.platformCount}</label>
 				<a href="http://www.youka.la/category/397127884A6E9CEF?1">购买链接</a>
 			</div>
 		</div>

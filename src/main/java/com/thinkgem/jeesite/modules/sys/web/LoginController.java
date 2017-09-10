@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Lists;
+import com.thinkgem.jeesite.common.utils.*;
 import com.thinkgem.jeesite.modules.pdd.email.model.Email;
 import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
 import com.thinkgem.jeesite.modules.pdd.entity.PddVcode;
@@ -37,10 +38,6 @@ import com.google.common.collect.Maps;
 import com.thinkgem.jeesite.common.config.Global;
 import com.thinkgem.jeesite.common.security.shiro.session.SessionDAO;
 import com.thinkgem.jeesite.common.servlet.ValidateCodeServlet;
-import com.thinkgem.jeesite.common.utils.CacheUtils;
-import com.thinkgem.jeesite.common.utils.CookieUtils;
-import com.thinkgem.jeesite.common.utils.IdGen;
-import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.common.web.BaseController;
 import com.thinkgem.jeesite.modules.sys.security.FormAuthenticationFilter;
 import com.thinkgem.jeesite.modules.sys.security.SystemAuthorizingRealm.Principal;
@@ -189,6 +186,10 @@ public class LoginController extends BaseController{
 					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
 					return "modules/sys/sysCardIndex";
 				}else {
+
+					Date date = DateUtils.parseDate(ss[1]);
+					user.setCardEndDate(date);
+
 					User user_sql = systemService.getByCardNumber(cardnumber);
 					if(user_sql!=null){
 						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，卡号已绑定");

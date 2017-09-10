@@ -60,7 +60,7 @@ public class QuartzListener implements ServletContextListener {
             logger.info("updateScheduleJob");
             ScheduleUtils.updateScheduleJob(quartzScheduler,scheduleJobEntity_jobSyncBean);
         }
-        ScheduleUtils.run(quartzScheduler,scheduleJobEntity_jobSyncBean);
+//        ScheduleUtils.run(quartzScheduler,scheduleJobEntity_jobSyncBean);
 
         PddQuartz scheduleJobEntity = new PddQuartz();
         scheduleJobEntity.setBeanName("jobStartupBean");
@@ -83,7 +83,7 @@ public class QuartzListener implements ServletContextListener {
             logger.info("updateScheduleJob");
             ScheduleUtils.updateScheduleJob(quartzScheduler,scheduleJobEntity);
         }
-        ScheduleUtils.run(quartzScheduler,scheduleJobEntity);
+//        ScheduleUtils.run(quartzScheduler,scheduleJobEntity);
 
         List<PddQuartz> pddQuartzList = pddQuartzService.findList(new PddQuartz());
         if(pddQuartzList!=null&&pddQuartzList.size()>0){

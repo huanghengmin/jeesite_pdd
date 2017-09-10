@@ -65,7 +65,10 @@ public class User extends DataEntity<User> {
 	private boolean enablePullRemand; //启用揽件提醒
 	private boolean enableSecondRemand;//启用二次揽件提醒
 	private boolean enableOrderCycle; //启用订单同步
-	
+	private Date cardEndDate;
+	private Integer noteCount;
+	private Integer platformCount;
+
 	private Role role;	// 根据角色查询用户条件
 	
 	private List<Role> roleList = Lists.newArrayList(); // 拥有角色列表
@@ -460,5 +463,29 @@ public class User extends DataEntity<User> {
 
 	public void setCardNumber(String cardNumber) {
 		this.cardNumber = cardNumber;
+	}
+
+	public Date getCardEndDate() {
+		return cardEndDate;
+	}
+
+	public void setCardEndDate(Date cardEndDate) {
+		this.cardEndDate = cardEndDate;
+	}
+
+	public Integer getNoteCount() {
+		return noteCount;
+	}
+
+	public void setNoteCount(Integer noteCount) {
+		this.noteCount = noteCount;
+	}
+
+	public Integer getPlatformCount() {
+		return platformCount;
+	}
+
+	public void setPlatformCount(Integer platformCount) {
+		this.platformCount = platformCount;
 	}
 }

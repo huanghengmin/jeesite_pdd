@@ -178,7 +178,7 @@ public class Check {
 
 
     public static void main(String args[])throws Exception{
-        /*String c1 = "10001";
+        String c1 = "10001";
         String c2 = "DDDD731DB7EE6A933F5F";
         String c3 = "";
         String c4 = "1.0";
@@ -187,14 +187,13 @@ public class Check {
         String c7 = "1,11";
         String result = zdy_login(c2);
         String[] ss = result.split("<\\|>");
-        System.out.print(ss);*/
+        System.out.print(ss[1]);
 
-        String c2 = "DDDDD86D02A6DFB3E9C5";
+        /*String c2 = "DDDDD86D02A6DFB3E9C5";
         String c4 = "1";
         String c5 = "0";
         String result = zdy_kd(c2,c4,c5);
-//        String[] ss = result.split("<\\|>");
-        System.out.print(result);
+        System.out.print(result);*/
 
       /*  String c1 = "10001";
         String c2 = "DDDD731DB7EE6A933F5F";

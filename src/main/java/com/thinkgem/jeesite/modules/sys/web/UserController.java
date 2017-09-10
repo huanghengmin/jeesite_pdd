@@ -3,6 +3,7 @@
  */
 package com.thinkgem.jeesite.modules.sys.web;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -105,9 +106,13 @@ public class UserController extends BaseController {
 			if(result!=null&&result.length()>0) {
 				String[] ss = result.split("<\\|>");
 				if (Long.parseLong(ss[0]) <= 0) {
+
 					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
 					return "modules/sys/userSet";
 				}
+				Date date = DateUtils.parseDate(ss[1]);
+				user.setCardEndDate(date);
+
 			}
 
 			User user_sql_ = UserUtils.getByPlatformNumber(user.getPlatformNumber());
@@ -121,6 +126,7 @@ public class UserController extends BaseController {
 				addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，平台卡已无可用次数");
 				return "modules/sys/userSet";
 			}
+			user.setPlatformCount(Integer.parseInt(result_num));
 
 			User user_sql_n = UserUtils.getByNoteNumber(user.getNoteNumber());
 			if(user_sql_n!=null&&!user_sql.getId().equals(user.getId())){
@@ -128,11 +134,13 @@ public class UserController extends BaseController {
 				return "modules/sys/userSet";
 			}
 
+
 			String result_note = Check.zdy_kd(user.getNoteNumber(),"1","0");
 			if(Integer.parseInt(result_note)<=0){
 				addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，短信卡已无可用次数");
 				return "modules/sys/userSet";
 			}
+			user.setNoteCount(Integer.parseInt(result_note));
 
 			User currentUser = UserUtils.getUser();
 			currentUser.setEmailRemand(user.getEmailRemand());

@@ -119,6 +119,8 @@ public class ConsumeMailQueue {
                             logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
                             SMSLZUtils.sendSms(note.getPhones(), note.getSignName(),note.getTemplateCode(),note.getJson_params());
                             Check.zdy_kd(num,"0","1");
+                            u.setNoteCount(Integer.parseInt(result)-1);
+                            systemService.updateUserSet(u);
                         }
                         Thread.sleep(1000);
                     }
