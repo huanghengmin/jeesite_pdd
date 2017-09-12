@@ -5,9 +5,13 @@
 <head>
 	<title>平台信息管理</title>
 	<meta name="decorator" content="default"/>
+	<script src="${ctxStatic}/layer-v3.0.3/layer/layer.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			//$("#name").focus();
+
+
+
+            //$("#name").focus();
 			$("#inputForm").validate({
 				submitHandler: function(form){
 					loading('正在提交，请稍等...');
@@ -57,6 +61,65 @@
             });
 
         });
+
+		function click_dialog_jh() {
+            //默认prompt
+            layer.prompt({title: '输入激活卡号，并确认!'}, function(pass, index){
+                layer.close(index);
+                $.ajax({
+                    type: "post",
+                    url:"${ctx}/sys/user/bindCardNumber",
+                    cache: false,
+                    data:'cardNumber=' + pass,
+                    success: function(response){
+                        layer.msg(response);
+                        window.parent.location.reload(); //刷新父页面
+                    },
+                    error: function(){
+                        layer.msg('请求服务器错误');
+                    }
+                });
+            });
+        }
+
+        function click_dialog_dx() {
+            //默认prompt
+            layer.prompt({title: '输入短信卡号，并确认!'}, function(pass, index){
+                $.ajax({
+                    url:"${ctx}/sys/user/bindNoteNumber",
+                    data:{'noteNumber':pass},
+                    type:"post",
+                    success:function(response){
+                        layer.msg(response);
+                        window.parent.location.reload(); //刷新父页面
+                    },
+                    error:function(data){
+                        layer.msg('请求服务器错误');
+                    }
+                });
+                layer.close(index);
+            });
+        }
+
+        function click_dialog_pt() {
+            //默认prompt
+            layer.prompt({title: '输入店铺卡号，并确认!'}, function(pass, index){
+                layer.close(index);
+                $.ajax({
+                    type: "post",
+                    url:"${ctx}/sys/user/bindPlatformNumber",
+                    cache: false,
+                    data:'platformNumber=' + pass,
+                    success: function(response){
+                        layer.msg(response);
+                        window.parent.location.reload(); //刷新父页面
+                    },
+                    error: function(){
+                        layer.msg('请求服务器错误');
+                    }
+                });
+            });
+        }
 	</script>
 </head>
 <body>
@@ -120,34 +183,38 @@
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">激活卡号：</label>
+			<%--<label class="control-label">激活卡号：</label>--%>
 			<div class="controls">
-				<form:input path="cardNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
-                <label>到期时间: <fmt:formatDate value="${user.cardEndDate}" pattern="yyyy-MM-dd HH:mm:ss"/></label>
+				<%--<form:input path="cardNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>--%>
+				<input class="btn btn-primary" type="button"  value="绑定激活卡" onclick="click_dialog_jh()"/>
+                <label>激活卡到期时间: <fmt:formatDate value="${user.cardEndDate}" pattern="yyyy-MM-dd HH:mm:ss"/></label>
 				<a href="http://www.youka.la/category/3C747E6FCDBFA105?1">购买链接</a>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">短信数量卡：</label>
+			<%--<label class="control-label">短信数量卡：</label>--%>
 			<div class="controls">
-				<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
-                <label>剩余数量: ${user.noteCount}</label>
+				<%--<form:input path="noteNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>--%>
+				<input class="btn btn-primary" type="button"  value="绑定短信卡" onclick="click_dialog_dx()"/>
+                <label>短信卡剩余数量: ${user.noteCount}</label>
 				<a href="http://www.youka.la/category/B3AE84B4A7ACDA75?1">购买链接</a>
 			</div>
 		</div>
 
 		<div class="control-group">
-			<label class="control-label">店铺数量卡：</label>
+			<%--<label class="control-label">店铺数量卡：</label>--%>
 			<div class="controls">
-				<form:input path="platformNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>
-                <label>剩余数量: ${user.platformCount}</label>
+				<%--<form:input path="platformNumber" htmlEscape="false" rows="4" maxlength="255" class="input-xxlarge "/>--%>
+				<input class="btn btn-primary" type="button"  value="绑定店铺卡" onclick="click_dialog_pt()"/>
+                <label>店铺卡剩余数量: ${user.platformCount}</label>
 				<a href="http://www.youka.la/category/397127884A6E9CEF?1">购买链接</a>
 			</div>
 		</div>
 		<div class="form-actions">
 			<shiro:hasPermission name="sys:user:edit"><input id="btnSubmit" class="btn btn-primary" type="submit" value="保 存"/>&nbsp;</shiro:hasPermission>
 			<input id="btnCancel" class="btn" type="button" value="返 回" onclick="history.go(-1)"/>
+
 		</div>
 	</form:form>
 </body>

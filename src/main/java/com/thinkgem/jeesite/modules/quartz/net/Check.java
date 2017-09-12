@@ -2,7 +2,10 @@ package com.thinkgem.jeesite.modules.quartz.net;
 
 import com.thinkgem.jeesite.modules.quartz.util.pdd.HttpClientUtil;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +37,10 @@ public class Check {
         $data=login($rjbh,$zh,$mm,$bb,$jqm,$yxh,$xxz);
         return $data;
     }*/
+
+
+
+
     public static String zdy_login(String c2) {
 
         Map<String, Object> stringMap = new HashMap<String, Object>();
@@ -48,7 +55,6 @@ public class Check {
         String response = null;
         try {
             response = HttpClientUtil.httpPostRequest(path_login, stringMap);
-//            System.out.println(response);
             return response;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -80,7 +86,6 @@ public class Check {
         String response = null;
         try {
             response = HttpClientUtil.httpPostRequest(path_kd, stringMap);
-//            System.out.println(response);
             return response;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -109,7 +114,6 @@ public class Check {
         String response = null;
         try {
             response = HttpClientUtil.httpPostRequest(path_pay, stringMap);
-            System.out.println(response);
             return response;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -117,6 +121,58 @@ public class Check {
         return null;
     }
 
+
+
+    /**
+     * 将字符串转成unicode
+     * @param str 待转字符串
+     * @return unicode字符串
+     */
+    public static String convert(String str)
+    {
+        str = (str == null ? "" : str);
+        String tmp;
+        StringBuffer sb = new StringBuffer(1000);
+        char c;
+        int i, j;
+        sb.setLength(0);
+        for (i = 0; i < str.length(); i++)
+        {
+            c = str.charAt(i);
+            sb.append("\\u");
+            j = (c >>>8); //取出高8位
+            tmp = Integer.toHexString(j);
+            if (tmp.length() == 1)
+                sb.append("0");
+            sb.append(tmp);
+            j = (c & 0xFF); //取出低8位
+            tmp = Integer.toHexString(j);
+            if (tmp.length() == 1)
+                sb.append("0");
+            sb.append(tmp);
+
+        }
+        return (new String(sb));
+    }
+
+    public static String decodeUnicode(final String dataStr) {
+        int start = 0;
+        int end = 0;
+        final StringBuffer buffer = new StringBuffer();
+        while (start > -1) {
+            end = dataStr.indexOf("\\u", start + 2);
+            String charStr = "";
+            if (end == -1) {
+                charStr = dataStr.substring(start + 2, dataStr.length());
+            } else {
+                charStr = dataStr.substring(start + 2, end);
+            }
+            char letter = (char) Integer.parseInt(charStr, 16); // 16进制parse整形字符串。
+            buffer.append(new Character(letter).toString());
+            start = end;
+        }
+        return buffer.toString();
+    }
     /*
     接口名称：zx
     中文名称：在线状态控制
@@ -168,7 +224,6 @@ public class Check {
         String response = null;
         try {
             response = HttpClientUtil.httpPostRequest(path_zx, stringMap);
-//            System.out.println(response);
             return response;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -179,15 +234,16 @@ public class Check {
 
     public static void main(String args[])throws Exception{
         String c1 = "10001";
-        String c2 = "DDDD731DB7EE6A933F5F";
+//        String c2 = "DDDD731DB7EE6A933F5F";
+        String c2 = "aaa";
         String c3 = "";
         String c4 = "1.0";
         String c5 = "jqm";
         String c6 = "";
         String c7 = "1,11";
         String result = zdy_login(c2);
-        String[] ss = result.split("<\\|>");
-        System.out.print(ss[1]);
+//        String[] ss = result.split("<\\|>");
+        System.out.print(result);
 
         /*String c2 = "DDDDD86D02A6DFB3E9C5";
         String c4 = "1";

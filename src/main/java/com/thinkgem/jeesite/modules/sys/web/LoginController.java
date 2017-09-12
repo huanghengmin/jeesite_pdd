@@ -179,27 +179,34 @@ public class LoginController extends BaseController{
 				addMessage(model, "用户'" + user.getLoginName() + "未找到，绑定失败");
 				return "modules/sys/sysCardIndex";
 			}
-			String result = Check.zdy_login(cardnumber); //校验登陆卡
-			if(result!=null&&result.length()>0){
-				String[] ss = result.split("<\\|>");
-				if(Long.parseLong(ss[0])<=0){
-					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
-					return "modules/sys/sysCardIndex";
-				}else {
+			if(StringUtils.isNotEmpty(cardnumber)) {
+				String result = Check.zdy_login(cardnumber); //校验登陆卡
+				if (!result.contains("Error") && result != null && result.length() > 0) {
+					String[] ss = result.split("<\\|>");
 
-					Date date = DateUtils.parseDate(ss[1]);
-					user.setCardEndDate(date);
+					Date date_ss = DateUtils.parseDate(ss[1]);
+					if (date_ss.getTime() - new Date().getTime() <= 0) {
+						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，登陆卡已过期");
+						return "modules/sys/sysCardIndex";
+					} else {
 
-					User user_sql = systemService.getByCardNumber(cardnumber);
-					if(user_sql!=null){
-						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，卡号已绑定");
-						return "modules/sys/sysLogin";
-					}else {
-						user.setCardNumber(cardnumber);
-						systemService.updateUserSet(user);
-						addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡成功，请重新登陆");
-						return "modules/sys/sysLogin";
+						Date date = DateUtils.parseDate(ss[1]);
+						user.setCardEndDate(date);
+
+						User user_sql = systemService.getByCardNumber(cardnumber);
+						if (user_sql != null) {
+							addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，卡号已绑定");
+							return "modules/sys/sysLogin";
+						} else {
+							user.setCardNumber(cardnumber);
+							systemService.updateUserSet(user);
+							addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡成功，请重新登陆");
+							return "modules/sys/sysLogin";
+						}
 					}
+				}else {
+					addMessage(model, "用户'" + user.getLoginName() + "绑定登陆卡失败，校验异常");
+					return "modules/sys/sysLogin";
 				}
 			}
 		}
@@ -353,10 +360,10 @@ public class LoginController extends BaseController{
 	public String registerVCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String phone = request.getParameter("phone");
 		if(phone!=null&&phone.length()>0){
-			int code = RandNumUtils.getRandNum(1,999999);
+			String code = RandNumUtils.getRandNum(1,999999);
 			PddVcode pddVcode = pddVcodeService.getByPhone(phone);
 			if(pddVcode!=null){
-				pddVcode.setVcode(String.valueOf(code));
+				pddVcode.setVcode(code);
 				pddVcode.setUpdateTime(new Date());
 				boolean flag = pddVcodeService.updateAndSendCode(pddVcode);
 				if(flag){
@@ -368,7 +375,7 @@ public class LoginController extends BaseController{
 				user.setId(IdGen.uuid());
 				pddVcode = new PddVcode();
 				pddVcode.setPhone(phone);
-				pddVcode.setVcode(String.valueOf(code));
+				pddVcode.setVcode(code);
 				pddVcode.setUpdateTime(new Date());
 				boolean flag = pddVcodeService.insertAndSendCode(pddVcode,user);
 				if(flag){
@@ -377,7 +384,6 @@ public class LoginController extends BaseController{
 				}
 			}
 		}
-//		return "modules/sys/sysRegister";
 		String msg = "发送短信异常，phone:"+phone;
 		return "{success:false,msg:"+msg+"}";
 	}

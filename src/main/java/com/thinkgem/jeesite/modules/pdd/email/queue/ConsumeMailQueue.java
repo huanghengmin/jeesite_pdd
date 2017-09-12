@@ -2,6 +2,7 @@ package com.thinkgem.jeesite.modules.pdd.email.queue;
 
 import com.alibaba.fastjson.JSON;
 import com.thinkgem.jeesite.common.utils.DateUtils;
+import com.thinkgem.jeesite.common.utils.StringUtils;
 import com.thinkgem.jeesite.modules.pdd.email.model.Email;
 import com.thinkgem.jeesite.modules.pdd.email.model.Note;
 import com.thinkgem.jeesite.modules.pdd.email.service.IMailService;
@@ -114,13 +115,17 @@ public class ConsumeMailQueue {
                     if (note != null) {
                         User u = note.getUser();
                         String num = u.getNoteNumber();
-                        String result = Check.zdy_kd(num,"1","0");
-                        if(Integer.parseInt(result)>0){
-                            logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
-                            SMSLZUtils.sendSms(note.getPhones(), note.getSignName(),note.getTemplateCode(),note.getJson_params());
-                            Check.zdy_kd(num,"0","1");
-                            u.setNoteCount(Integer.parseInt(result)-1);
-                            systemService.updateUserSet(u);
+                        if(StringUtils.isNotEmpty(num)) {
+                            String result = Check.zdy_kd(num, "1", "0");
+                            if (!result.contains("Error") ) {
+                                if(Integer.parseInt(result) > 0){
+                                    logger.info("剩余短信总数:{}", NoteQueue.getNoteQueue().size());
+                                    SMSLZUtils.sendSms(note.getPhones(), note.getSignName(), note.getTemplateCode(), note.getJson_params());
+                                    Check.zdy_kd(num, "0", "1");
+                                    u.setNoteCount(Integer.parseInt(result) - 1);
+                                    systemService.updateUserSet(u);
+                                }
+                            }
                         }
                         Thread.sleep(1000);
                     }

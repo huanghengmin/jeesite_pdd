@@ -119,25 +119,24 @@
 
 
         function shortMessagraxc() {
+
             //发送请求
             if(checkSubmitMobil()){
-                $('#vcode_btn').click(function () {
+                $('#vcode_btn').attr('disabled',"true");
                     var count = 60;
                     var countdown = setInterval(CountDown, 1000);
 
                     function CountDown() {
-                        $("#vcode_btn").attr("disabled", true);
                         $("#vcode_btn").val("" + count + "s");
                         if (count == 0) {
                             $("#vcode_btn").val("重新获取").removeAttr("disabled");
                             clearInterval(countdown);
                         }
                         count--;
+
                     }
 
-
-                })
-                ajaxSend();
+                    ajaxSend();
             }
         };
 
@@ -154,7 +153,7 @@
             <div class="span5"><h3 class="strong highlight">免费注册新账户</h3>
 
 
-                <form name="RegForm" method="post" onsubmit="submit()" id="RegForm"  action="${ctx}/register/register"
+                <form name="RegForm" method="post" onsubmit="submit()" id="RegForm"
                        class="form-horizontal">
 
                     <div class="control-group"><input for="phone" id="phone" name="phone" class="text-large span4"

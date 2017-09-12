@@ -92,11 +92,14 @@ public class SystemAuthorizingRealm extends AuthorizingRealm {
 				if(role.getId().equals("6")){ //普通用户
 					if(user.getCardNumber()!=null&&user.getCardNumber().length()>0){
 						String result = Check.zdy_login(user.getCardNumber()); //校验登陆卡
-						if(result!=null&&result.length()>0){
+						if(!result.contains("Error")&&result!=null&&result.length()>0){
 							String[] ss = result.split("<\\|>");
-							if(Long.parseLong(ss[0])<=0){
+							Date date = DateUtils.parseDate(ss[1]);
+							if(date.getTime()-new Date().getTime()<=0){
 								throw new AuthenticationException("msg:绑定登陆卡已过期.请重新绑定新卡！");
 							}
+						}else {
+							throw new AuthenticationException("msg:绑定登陆卡失败,校验异常!");
 						}
 					}else {
 						if(new Date().getTime()- user.getCreateDate().getTime()>1000*60*60*24*7){ //试用7天
