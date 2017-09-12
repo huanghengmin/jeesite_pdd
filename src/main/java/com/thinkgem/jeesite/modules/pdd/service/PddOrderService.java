@@ -124,4 +124,20 @@ public class PddOrderService extends CrudService<PddOrderDao, PddOrder> {
 	public List<PddOrder> findListByNotPullExpress(PddOrder pddOrder) {
 		return pddOrderDao.findListByNotPullExpress(pddOrder);
 	}
+
+	public long findCountByLogistice(PddOrder entity){
+		return pddOrderDao.findCountByLogistice(entity);
+	}
+
+	public long findCountBySFLogistice(PddOrder entity){
+		return pddOrderDao.findCountBySFLogistice(entity);
+	}
+
+	public long findCountByUserLogistice(PddOrder pddOrder) {
+		return pddOrderDao.findCountByUserLogistice(pddOrder);
+	}
+
+	public long findCountByUserSFLogistice(PddOrder pddOrder) {
+		return pddOrderDao.findCountByUserSFLogistice(pddOrder);
+	}
 }

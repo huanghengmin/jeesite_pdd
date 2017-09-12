@@ -147,28 +147,28 @@ public class UserController extends BaseController {
         if (StringUtils.isNotEmpty(platformNumber)) {
             User user_sql_n = UserUtils.getByPlatformNumber(platformNumber);
             if (user_sql_n != null && !user_sql_n.getId().equals(currentUser.getId())) {
-                msg = "保存用户设置失败,短信卡已被使用";
+                msg = "保存用户设置失败,平台卡已被使用";
                 return msg;
             }
 
             String result_note = Check.zdy_kd(platformNumber, "1", "0");
             if (result_note.contains("Error") ) {
-                msg = "绑定短信卡失败，短信卡无效";
+                msg = "绑定平台卡失败，平台卡无效";
                 return msg;
             }
 
             if(Integer.parseInt(result_note) <= 0){
-                msg = "绑定短信卡失败，短信卡已无可用次数";
+                msg = "绑定平台卡失败，平台卡已无可用次数";
                 return msg;
             }
 
-            currentUser.setNoteCount(Integer.parseInt(result_note));
+            currentUser.setPlatformCount(Integer.parseInt(result_note));
             currentUser.setPlatformNumber(platformNumber);
             systemService.updateUserSet(currentUser);
-            msg = "绑定短信卡成功";
+            msg = "绑定平台卡成功";
             return msg;
         }else {
-            msg = "绑定短信卡失败，登陆卡号为空";
+            msg = "绑定平台卡失败，平台卡号为空";
             return msg;
         }
     }

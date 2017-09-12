@@ -73,7 +73,7 @@
                     data:'cardNumber=' + pass,
                     success: function(response){
                         layer.msg(response);
-                        window.parent.location.reload(); //刷新父页面
+                        window.location.reload(); //刷新父页面
                     },
                     error: function(){
                         layer.msg('请求服务器错误');
@@ -91,7 +91,7 @@
                     type:"post",
                     success:function(response){
                         layer.msg(response);
-                        window.parent.location.reload(); //刷新父页面
+                        window.location.reload(); //刷新父页面
                     },
                     error:function(data){
                         layer.msg('请求服务器错误');
@@ -112,7 +112,7 @@
                     data:'platformNumber=' + pass,
                     success: function(response){
                         layer.msg(response);
-                        window.parent.location.reload(); //刷新父页面
+                        window.location.reload(); //刷新父页面
                     },
                     error: function(){
                         layer.msg('请求服务器错误');
